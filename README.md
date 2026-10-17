@@ -51,6 +51,16 @@ uvicorn main:app --reload
 
 The API will be available at `http://127.0.0.1:8000`. Interactive API documentation is available at `http://127.0.0.1:8000/docs`.
 
+## Run with Docker Compose
+
+Start PostgreSQL, the API, and the dashboard from the repository root:
+
+```powershell
+docker compose up --build -d
+```
+
+Open the dashboard at `http://localhost:3000` and the API documentation at `http://localhost:8000/docs`. Compose uses a local development database password by default; set `POSTGRES_PASSWORD` in `.env` before starting if you need to change it. Stop the services with `docker compose down`.
+
 ## Frontend Setup
 
 In a second terminal, install the frontend dependencies and start Vite:

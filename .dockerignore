@@ -1,0 +1,13 @@
+.git
+.env
+.venv
+venv
+env
+Include
+Lib
+Scripts
+__pycache__
+*.py[cod]
+node_modules
+deadlock-dashboard/node_modules
+deadlock-dashboard/dist
