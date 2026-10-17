@@ -32,7 +32,6 @@ Create and activate a virtual environment, then install the Python dependencies:
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
 python -m pip install fastapi uvicorn httpx pandas sqlalchemy psycopg2-binary
 ```
 
@@ -67,7 +66,7 @@ In a second terminal, install the frontend dependencies and start Vite:
 
 ```powershell
 cd deadlock-dashboard
-npm install
+npm install vite
 npm run dev
 ```
 
