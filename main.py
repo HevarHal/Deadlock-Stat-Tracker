@@ -10,9 +10,11 @@ app = FastAPI(title="Deadlock Live Analytics Pipeline")
 # Boots up database structures inside Docker on app launch
 init_db()
 
+#origins=[ frontend] 
+#fix this to be secure and only access backend 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"], #allow_origins=["*"] 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
