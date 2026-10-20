@@ -3,20 +3,27 @@ import { Shield, Target, Flame, Trophy, Search, Loader2 } from 'lucide-react';
 
 function App() {
   // Uses a default active public community profile to ensure the first render works
-  const [accountId, setAccountId] = useState('76561198395093892');
+  const [accountId, setAccountId] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
+  const [scope, setScope] = useState('season1');
 
   useEffect(() => {
+    if (!accountId) {
+      setData(null);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
     setLoading(true);
     setError(null);
-    console.log(`Pipeline query executing via proxy for player profile: ${accountId}`);
-    
-    // Hits your Vite development proxy routing layer
-    fetch(`/api/player/${accountId}/summary`)
+    console.log(`Pipeline query executing via proxy for player profile: ${accountId} (${scope})`);
+
+    fetch(`/api/player/${accountId}/summary?scope=${encodeURIComponent(scope)}`)
       .then(res => {
         if (!res.ok) {
           throw new Error(`Profile not found or API error (Status: ${res.status})`);
@@ -24,8 +31,10 @@ function App() {
         return res.json();
       })
       .then(json => {
-        if (json && json.metrics) {
-          setData(json.metrics);
+        if (json.hasRankedMatches === false) {
+          setData({ ...(json.metrics || {}), hasRankedMatches: false });
+        } else if (json.metrics) {
+          setData({ ...json.metrics, hasRankedMatches: true });
         } else {
           throw new Error("JSON payload missing expected internal metrics keys.");
         }
@@ -36,7 +45,7 @@ function App() {
         setError(err.message);
         setLoading(false);
       });
-  }, [accountId]);
+  }, [accountId, scope]);
 
   const handleSearchSubmit = async (e) => {
     e.preventDefault();
@@ -63,12 +72,39 @@ function App() {
 
   return (
     <div style={{ backgroundColor: '#121214', color: '#E1E1E6', minHeight: '100vh', padding: '40px', fontFamily: 'sans-serif' }}>
-      
+
       {/* HEADER WITH INTEGRATED INTERACTIVE CONTROLS */}
       <header style={{ borderBottom: '1px solid #29292E', paddingBottom: '20px', marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+
+        <div style={{ marginTop: '40px', color: '#7C7C8A' }}>
+          Search for a player by name or account ID to load their stats.
+        </div>
+
         <div>
           <h1 style={{ fontSize: '28px', color: '#FFB800', margin: 0 }}>DEADLOCK TELEMETRY</h1>
           <p style={{ color: '#7C7C8A', marginTop: '5px' }}>Full-Stack Performance Tracker & Match Analytics Engine</p>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#202024', border: '1px solid #29292E', borderRadius: '6px', padding: '6px' }}>
+          {['season1', 'all'].map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => setScope(option)}
+              style={{
+                backgroundColor: scope === option ? '#FFB800' : 'transparent',
+                color: scope === option ? '#121214' : '#E1E1E6',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                padding: '8px 12px',
+                fontWeight: 'bold',
+                textTransform: 'capitalize'
+              }}
+            >
+              {option === 'season1' ? 'Season 1' : 'All'}
+            </button>
+          ))}
         </div>
 
         {/* SEARCH BAR INPUT FOR DYNAMIC LOOKUPS */}
@@ -113,14 +149,22 @@ function App() {
         <div style={{ backgroundColor: '#202024', padding: '30px', borderRadius: '8px', borderLeft: '4px solid #F75A68', marginTop: '20px' }}>
           <h3 style={{ color: '#F75A68', margin: '0 0 10px 0' }}>Data Pipeline Exception</h3>
           <p style={{ color: '#E1E1E6', margin: 0 }}>{error}</p>
-          <button onClick={() => setAccountId('76561198395093892')} style={{ marginTop: '15px', background: 'none', border: '1px solid #7C7C8A', color: '#7C7C8A', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer' }}>
+          <button onClick={() => setAccountId('')} style={{ marginTop: '15px', background: 'none', border: '1px solid #7C7C8A', color: '#7C7C8A', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer' }}>
             Reset to Test Profile
+          </button>
+        </div>
+      ) : data?.hasRankedMatches === false ? (
+        <div style={{ marginTop: '30px', color: '#7C7C8A' }}>
+          <h2 style={{ color: '#E1E1E6', fontWeight: 'bold' }}>This player has no ranked matches</h2>
+          <button onClick={() => setAccountId('')} style={{ marginTop: '15px', background: 'none', border: '1px solid #7C7C8A', color: '#7C7C8A', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer' }}>
+            Look at standard matches
           </button>
         </div>
       ) : (
         <div>
           <div style={{ marginBottom: '20px', color: '#7C7C8A' }}>
-            Displaying processed matrix rows for ID: <strong style={{ color: '#FFB800' }}>{accountId}</strong>
+            Displaying <strong style={{ color: '#FFB800', textTransform: 'capitalize' }}>{scope === 'season1' ? 'Season 1' : 'All'} </strong>
+            processed matrix rows for ID: <strong style={{ color: '#FFB800' }}>{accountId}</strong>
           </div>
 
           {/* TELEMETRY ANALYTICS METRICS LAYER */}
@@ -163,7 +207,7 @@ function App() {
 
             <div style={{ backgroundColor: '#202024', padding: '20px', borderRadius: '8px', borderLeft: '4px solid #8257E5' }}>
               <Shield size={24} color="#8257E5" />
-              <h3 style={{ color: '#7C7C8A', margin: '10px 0 5px 0' }}>Season 1 Most Played</h3>
+              <h3 style={{ color: '#7C7C8A', margin: '10px 0 5px 0' }}>{scope === 'season1' ? 'Season 1 Most Played' : 'Most Played Overall'}</h3>
               <p style={{ fontSize: '28px', fontWeight: 'bold', margin: 0 }}>{data?.dominantHero || 'Unknown'} <span style={{ color: '#7C7C8A', fontSize: '16px' }}>({data?.dominantHeroMatches || 0})</span></p>
             </div>
 
@@ -174,7 +218,8 @@ function App() {
             </div>
           </div>
         </div>
-      )}
+      )
+    }
     </div>
   );
 }
