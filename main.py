@@ -22,7 +22,7 @@ app.add_middleware(
 
 SEASON_1 = "season_1_player_outcomes_v7"
 SEASON_1_START = 1785430800
-SEASON_1_END = 1791493200
+SEASON_1_END = 1793854800
 RANKED_MATCH_MODE = 4
 
 # Dependency to open/close safe database sessions automatically per request
