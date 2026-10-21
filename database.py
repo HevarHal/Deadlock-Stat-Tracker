@@ -20,8 +20,8 @@ class PlayerStat(Base):
 
     unscored = Column(Integer)
     win_rate = Column(Float)
-    # Keep the existing database column name so current PostgreSQL tables remain compatible.
-    kill_death_ratio = Column("avg_kills", Float)
+
+    kill_death_ratio = Column(Float)
     avg_souls = Column(Integer)
     dominant_hero = Column(String)
     dominant_hero_matches = Column(Integer)
@@ -36,6 +36,7 @@ def init_db():
         table_exists = connection.execute(
             text("SELECT 1 FROM information_schema.tables WHERE table_name = 'player_stats' AND table_schema = 'public'")
         ).first()
+    
 
         if not table_exists:
             return
@@ -53,7 +54,7 @@ def init_db():
             "losses": "INTEGER",
             "unscored": "INTEGER",
             "win_rate": "DOUBLE PRECISION",
-            "avg_kills": "DOUBLE PRECISION",
+            "kill_death_ratio": "DOUBLE PRECISION",
             "avg_souls": "INTEGER",
             "dominant_hero": "VARCHAR",
             "dominant_hero_matches": "INTEGER",
