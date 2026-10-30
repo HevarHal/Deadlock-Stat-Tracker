@@ -19,7 +19,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-SEASON_1 = "season_1_player_outcomes_v7"
+SEASON_1 = "season_1_player_outcomes_v8"
 SEASON_1_START = 1785430800
 SEASON_1_END = 1793854800
 RANKED_MATCH_MODE = 4
@@ -136,12 +136,7 @@ async def get_player_performance(
             overall_hero_matches = int(overall_hero_counts.max()) if not overall_hero_counts.empty else 0
             overall_hero = hero_names.get(overall_hero_id, overall_hero_id)
 
-            filtered_matches = [
-                match for match in raw_matches
-                if match.get("match_mode") == RANKED_MATCH_MODE and (
-                    not season_only or SEASON_1_START <= match["start_time"] < SEASON_1_END
-                )
-            ] if scope_key == "all" else [
+            filtered_matches = raw_matches if scope_key == "all" else [
                 match for match in raw_matches
                 if match.get("match_mode") == RANKED_MATCH_MODE and SEASON_1_START <= match["start_time"] < SEASON_1_END
             ]
@@ -151,7 +146,7 @@ async def get_player_performance(
                     "accountId": account_id,
                     "scope": scope_key,
                     "hasRankedMatches": False,
-                    "message": "No ranked matches recorded for this player in the selected scope.",
+                    "message": "No matches recorded for this player in the selected scope.",
                     "metrics": {
                         "totalMatches": 0,
                         "wins": 0,
@@ -175,7 +170,7 @@ async def get_player_performance(
                 & df["player_match_outcome"].ne(2)
                 & df["start_time"].ge(unscored_cutoff)
             ).sum())
-            total_matches = wins + losses
+            total_matches = len(filtered_matches)
             decided_matches = wins + losses
             win_rate = float(round((wins / decided_matches) * 100, 1)) if decided_matches else 0.0
             total_kills = int(df["player_kills"].sum())
