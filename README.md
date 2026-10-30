@@ -10,7 +10,6 @@ Deadlock Stat Tracker is a full-stack dashboard for searching Steam players and 
 
 Search for a Steam player, select a result, and switch between **Season 1** ranked stats and **All Matches** to explore the dashboard. Click the preview to try the live demo.
 
-If the new domain does not resolve yet, use the [temporary demo address](http://3.138.109.149/).
 
 ## Features
 
