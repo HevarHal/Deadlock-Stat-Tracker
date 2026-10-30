@@ -2,6 +2,16 @@
 
 Deadlock Stat Tracker is a full-stack dashboard for searching Steam players and viewing their ranked Deadlock performance. The backend fetches match history from the Deadlock API, calculates player metrics, and caches results in PostgreSQL. The frontend is a React and Vite dashboard.
 
+## Live Demo
+
+**[Launch Deadlock Tracker](https://deadlocktracker.ca/)**
+
+[![Animated demo showing player search and switching between Season 1 and All Matches](docs/demo.gif)](https://deadlocktracker.ca/)
+
+Search for a Steam player, select a result, and switch between **Season 1** ranked stats and **All Matches** to explore the dashboard. Click the preview to try the live demo.
+
+If the new domain does not resolve yet, use the [temporary demo address](http://3.138.109.149/).
+
 ## Features
 
 - Search for Deadlock players by Steam name
