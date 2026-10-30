@@ -4,11 +4,8 @@ Deadlock Stat Tracker is a full-stack dashboard for searching Steam players and 
 
 ## Live Demo
 
-**[Launch Deadlock Tracker](https://deadlocktracker.ca/)**
+**[Launch Deadlock Tracker](https://www.deadlocktracker.ca/)**
 
-Search for **Spiralwind**, select the player, and switch between **Season 1** ranked stats and **All Matches** to explore the dashboard.
-
-If the new domain does not resolve yet, use the [temporary demo address](http://3.138.109.149/).
 
 ## Features
 
