@@ -25,6 +25,74 @@ SEASON_1_END = 1793854800
 RANKED_MATCH_MODE = 4
 UNSCORED_LOOKBACK_SECONDS = 90 * 24 * 60 * 60
 
+
+def select_matches(matches, scope):
+    if scope == "all":
+        return matches
+    return [
+        match for match in matches
+        if match.get("match_mode") == RANKED_MATCH_MODE
+        and SEASON_1_START <= match["start_time"] < SEASON_1_END
+    ]
+
+
+@app.get("/api/player/{account_id}/matches")
+async def get_player_matches(
+    account_id: int,
+    scope: str = Query(default="season1", pattern="^(all|season1)$"),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+):
+    if account_id < 0:
+        raise HTTPException(status_code=422, detail="Account ID must be non-negative.")
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(
+                f"https://api.deadlock-api.com/v1/players/{account_id}/match-history"
+            )
+            if response.status_code == 404:
+                raise HTTPException(status_code=404, detail="Player match history is unavailable.")
+            if response.status_code != 200:
+                raise HTTPException(status_code=502, detail="Match history could not be loaded. Please try again.")
+            matches = sorted(
+                select_matches(response.json(), scope),
+                key=lambda match: (match["start_time"], match.get("match_id", 0)),
+                reverse=True,
+            )
+            total = len(matches)
+            start = (page - 1) * page_size
+            selected = matches[start:start + page_size]
+            heroes = {}
+            if selected:
+                try:
+                    hero_response = await client.get("https://api.deadlock-api.com/v1/assets/heroes")
+                    if hero_response.status_code == 200:
+                        heroes = {str(hero["id"]): hero["name"] for hero in hero_response.json()}
+                except httpx.RequestError:
+                    pass  # Keep the match list usable if hero names are temporarily unavailable.
+            outcomes = {0: "Unknown", 1: "Win", 2: "Loss", 3: "Penalized", 4: "Party penalty", 5: "Unscored"}
+            modes = {0: "Unknown", 1: "Unranked", 2: "Private lobby", 3: "Co-op bots", 4: "Ranked", 5: "Server test", 6: "Tutorial", 7: "Hero Labs", 8: "Placement"}
+            return {
+                "accountId": str(account_id), "scope": scope, "page": page,
+                "pageSize": page_size, "totalMatches": total,
+                "totalPages": (total + page_size - 1) // page_size,
+                "matches": [
+                    {
+                        "matchId": match.get("match_id"),
+                        "startTime": match["start_time"],
+                        "heroName": heroes.get(str(match.get("hero_id")), f"Hero {match.get('hero_id', '?')}"),
+                        "mode": modes.get(match.get("match_mode"), "Unknown"),
+                        "result": outcomes.get(match.get("player_match_outcome"), "Unknown"),
+                        "kills": match.get("player_kills"), "deaths": match.get("player_deaths"),
+                        "assists": match.get("player_assists"), "souls": match.get("net_worth"),
+                        "durationSeconds": match.get("match_duration_s"),
+                    }
+                    for match in selected
+                ],
+            }
+        except httpx.RequestError:
+            raise HTTPException(status_code=502, detail="The Deadlock API could not be reached.")
+
 # Dependency to open/close safe database sessions automatically per request
 def get_db():
     db = SessionLocal()
@@ -136,10 +204,7 @@ async def get_player_performance(
             overall_hero_matches = int(overall_hero_counts.max()) if not overall_hero_counts.empty else 0
             overall_hero = hero_names.get(overall_hero_id, overall_hero_id)
 
-            filtered_matches = raw_matches if scope_key == "all" else [
-                match for match in raw_matches
-                if match.get("match_mode") == RANKED_MATCH_MODE and SEASON_1_START <= match["start_time"] < SEASON_1_END
-            ]
+            filtered_matches = select_matches(raw_matches, scope_key)
 
             if not filtered_matches:
                 return {

@@ -16,6 +16,7 @@ Search for a Steam player, select a result, and switch between **Season 1** and 
 - **Season 1:** ranked matches within the configured Season 1 dates.
 - **All Matches:** every match mode available in the player's returned history, across all dates.
 - Total matches, wins, losses, win rate, K/D ratio, and average souls per match.
+- Match history below the stats: newest first, 20 per page, with hero, mode, result, K/D/A, souls, duration, and match ID. Dates use the viewer's local time.
 - Most-played heroes for the selected scope and overall history.
 - PostgreSQL storage for calculated Season 1 statistics, with conditional cache reuse.
 - HTTPS certificates, renewal, and domain redirects managed by Caddy.
@@ -137,6 +138,7 @@ npm run build
 | `GET /api/player/search?query=<name>` | Search Steam players by name |
 | `GET /api/player/{account_id}/summary?scope=season1` | Season 1 ranked statistics; default scope |
 | `GET /api/player/{account_id}/summary?scope=all` | Statistics for all returned match modes and dates |
+| `GET /api/player/{account_id}/matches?scope=season1&page=1&page_size=20` | Paginated match history; supports `scope=all`, with page size limited to 100 |
 
 Public `/api` requests pass through Caddy and the frontend's Nginx proxy. The root status route and `/docs` are accessed directly through the backend, not the public frontend root.
 

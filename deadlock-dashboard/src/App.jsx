@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Shield, Target, Flame, Trophy, Search, Loader2 } from 'lucide-react';
+import MatchHistory from './MatchHistory';
 
 function App() {
   // Uses a default active public community profile to ensure the first render works
@@ -231,6 +232,7 @@ function App() {
         </div>
       )
     }
+      {accountId && <MatchHistory key={`${accountId}:${scope}`} accountId={accountId} scope={scope} />}
     </div>
   );
 }
