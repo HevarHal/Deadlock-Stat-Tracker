@@ -1,0 +1,12 @@
+deadlocktracker.ca {
+    encode zstd gzip
+    reverse_proxy frontend:80
+}
+
+www.deadlocktracker.ca {
+    redir https://deadlocktracker.ca{uri} permanent
+}
+
+:80 {
+    reverse_proxy frontend:80
+}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Shield, Target, Flame, Trophy, Search, Loader2 } from 'lucide-react';
 
 function App() {
@@ -12,18 +12,11 @@ function App() {
   const [scope, setScope] = useState('season1');
 
   useEffect(() => {
-    if (!accountId) {
-      setData(null);
-      setLoading(false);
-      setError(null);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
+    if (!accountId) return;
+    const controller = new AbortController();
     console.log(`Pipeline query executing via proxy for player profile: ${accountId} (${scope})`);
 
-    fetch(`/api/player/${accountId}/summary?scope=${encodeURIComponent(scope)}`)
+    fetch(`/api/player/${accountId}/summary?scope=${encodeURIComponent(scope)}`, { signal: controller.signal })
       .then(res => {
         if (!res.ok) {
           throw new Error(`Profile not found or API error (Status: ${res.status})`);
@@ -41,10 +34,12 @@ function App() {
         setLoading(false);
       })
       .catch(err => {
+        if (controller.signal.aborted) return;
         console.error("Fetch operation failed:", err);
         setError(err.message);
         setLoading(false);
       });
+    return () => controller.abort();
   }, [accountId, scope]);
 
   const handleSearchSubmit = async (e) => {
@@ -67,7 +62,11 @@ function App() {
 
   const selectPlayer = (player) => {
     setSearchResults([]);
-    setAccountId(String(player.accountId));
+    if (String(player.accountId) !== accountId) {
+      setLoading(true);
+      setError(null);
+      setAccountId(String(player.accountId));
+    }
   };
 
   return (
@@ -90,7 +89,13 @@ function App() {
             <button
               key={option}
               type="button"
-              onClick={() => setScope(option)}
+              onClick={() => {
+                if (option !== scope && accountId) {
+                  setLoading(true);
+                  setError(null);
+                }
+                setScope(option);
+              }}
               style={{
                 backgroundColor: scope === option ? '#FFB800' : 'transparent',
                 color: scope === option ? '#121214' : '#E1E1E6',
@@ -102,7 +107,7 @@ function App() {
                 textTransform: 'capitalize'
               }}
             >
-              {option === 'season1' ? 'Season 1' : 'All'}
+              {option === 'season1' ? 'Season 1' : 'All Matches'}
             </button>
           ))}
         </div>
@@ -113,7 +118,7 @@ function App() {
             <Search size={18} color="#7C7C8A" style={{ position: 'absolute', left: '12px' }} />
             <input 
               type="text" 
-              placeholder="Enter Player Account ID..." 
+              placeholder="Enter Steam player name..." 
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               style={{ backgroundColor: '#202024', border: '1px solid #29292E', borderRadius: '6px', color: '#E1E1E6', padding: '10px 12px 10px 40px', fontSize: '14px', width: '240px', outline: 'none' }}
@@ -149,26 +154,32 @@ function App() {
         <div style={{ backgroundColor: '#202024', padding: '30px', borderRadius: '8px', borderLeft: '4px solid #F75A68', marginTop: '20px' }}>
           <h3 style={{ color: '#F75A68', margin: '0 0 10px 0' }}>Data Pipeline Exception</h3>
           <p style={{ color: '#E1E1E6', margin: 0 }}>{error}</p>
-          <button onClick={() => setAccountId('')} style={{ marginTop: '15px', background: 'none', border: '1px solid #7C7C8A', color: '#7C7C8A', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer' }}>
-            Reset to Test Profile
+          <button onClick={() => { setAccountId(''); setData(null); setLoading(false); setError(null); }} style={{ marginTop: '15px', background: 'none', border: '1px solid #7C7C8A', color: '#7C7C8A', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer' }}>
+            Clear player
           </button>
         </div>
       ) : data?.hasRankedMatches === false ? (
         <div style={{ marginTop: '30px', color: '#7C7C8A' }}>
           <h2 style={{ color: '#E1E1E6', fontWeight: 'bold' }}>This player has no ranked matches</h2>
-          <button onClick={() => setAccountId('')} style={{ marginTop: '15px', background: 'none', border: '1px solid #7C7C8A', color: '#7C7C8A', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer' }}>
-            Look at standard matches
+          <button onClick={() => { setAccountId(''); setData(null); setLoading(false); setError(null); }} style={{ marginTop: '15px', background: 'none', border: '1px solid #7C7C8A', color: '#7C7C8A', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer' }}>
+            Search another player
           </button>
         </div>
       ) : (
         <div>
           <div style={{ marginBottom: '20px', color: '#7C7C8A' }}>
-            Displaying <strong style={{ color: '#FFB800', textTransform: 'capitalize' }}>{scope === 'season1' ? 'Season 1' : 'All'} </strong>
+            Displaying <strong style={{ color: '#FFB800', textTransform: 'capitalize' }}>{scope === 'season1' ? 'Season 1 Ranked' : 'All Matches'} </strong>
             processed matrix rows for ID: <strong style={{ color: '#FFB800' }}>{accountId}</strong>
           </div>
 
           {/* TELEMETRY ANALYTICS METRICS LAYER */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
+            <div style={{ backgroundColor: '#202024', padding: '20px', borderRadius: '8px', borderLeft: '4px solid #FFB800' }}>
+              <Target size={24} color="#FFB800" />
+              <h3 style={{ color: '#7C7C8A', margin: '10px 0 5px 0' }}>Total Matches</h3>
+              <p style={{ fontSize: '32px', fontWeight: 'bold', margin: 0 }}>{(data?.totalMatches ?? 0).toLocaleString()}</p>
+            </div>
+
             <div style={{ backgroundColor: '#202024', padding: '20px', borderRadius: '8px', borderLeft: '4px solid #00B37E' }}>
               <Trophy size={24} color="#00B37E" />
               <h3 style={{ color: '#7C7C8A', margin: '10px 0 5px 0' }}>Win Rate</h3>
