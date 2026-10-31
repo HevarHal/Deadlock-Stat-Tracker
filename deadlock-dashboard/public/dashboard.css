@@ -1,0 +1,452 @@
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;padding:56px 4vw;background:#393052;color:#fff;font-family:Inter,'Segoe UI',sans-serif}button,input,a{-webkit-tap-highlight-color:transparent}button,input{font:inherit}button,a{cursor:pointer}button:disabled{opacity:.35;cursor:default}a{color:inherit;text-decoration:none}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #ffd4a9;outline-offset:4px}.dashboard{max-width:1420px;margin:auto;border-radius:36px;overflow:hidden;background:radial-gradient(ellipse at 28% 53%,#d45aaa99,transparent 48%),radial-gradient(ellipse at 100% 0%,#358ab0,transparent 55%),linear-gradient(120deg,#7830b0,#4c29a4 68%,#492b9c);box-shadow:0 35px 80px #140d3644}header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:30px 36px}.brand{font-size:48px;font-weight:950;display:flex;align-items:center;gap:12px}.brand span{font-size:16px;line-height:1.1;letter-spacing:2px}.brand small{font-size:9px;letter-spacing:3px;opacity:.6}nav{display:flex;gap:8px;font-size:13px}nav a,.scope button{padding:12px 16px;border-radius:12px}nav .active{background:#ffffffed;color:#492983}form{display:flex;gap:8px}input{width:165px;background:#ffffff13;border:1px solid #ffffff30;border-radius:10px;padding:11px;color:white}input::placeholder{color:#e1d3f4}button{border:1px solid #ffffff26;background:#ffffff18;color:white;border-radius:9px;padding:10px 14px}#status{font-size:11px;letter-spacing:1px;padding:0 36px;color:#eadcf8;min-height:20px}.overview{display:grid;grid-template-columns:35% 29% 36%;min-height:540px}.hero{position:relative;min-height:550px;overflow:hidden}.hero>img{width:100%;height:100%;position:absolute;object-fit:cover;object-position:50% 20%;mask-image:linear-gradient(to bottom,transparent,#000 10%,#000 70%,transparent);mix-blend-mode:luminosity;filter:contrast(1.08)}.ghost{position:absolute;top:22px;left:24px;font-size:64px;font-weight:950;writing-mode:vertical-rl;opacity:.12;letter-spacing:5px}.hero-caption{position:absolute;bottom:22px;left:36px;text-shadow:0 2px 18px #1f103c}.hero-caption span,.eyebrow{font-size:10px;letter-spacing:2px;font-weight:600;color:#eadbf5}.hero-caption h2{font-size:54px;letter-spacing:-2px;margin:8px 0}.hero-caption p{font-size:13px;color:#dfcfef}.performance{padding:40px 0 0;text-align:center}.orbit{position:relative;aspect-ratio:1;margin-top:65px;border:1px solid #ffffff15;border-radius:50%}.ring{position:absolute;border:1px solid #ffffff10;border-radius:50%;inset:15%}.r3{inset:30%}.orbit svg{width:100%;height:100%}.orbit-center{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center}.orbit-center strong{font-size:64px;letter-spacing:-4px}.orbit-center span{font-size:9px;letter-spacing:2px;color:#e0c5ed}.axis{position:absolute;font-size:10px;line-height:1.7;left:0;width:100%;color:#e6d2f1}.top{top:-35px}.bottom{bottom:-30px}.chart-note{font-size:10px;color:#d0b9e5;margin-top:54px;padding:0 20px}.profile{padding:25px 30px 30px}.profile h1{font-size:clamp(32px,3.4vw,52px);line-height:1.05;letter-spacing:-2px;margin:14px 0}.subtitle{font-size:12px;color:#e0d8ef}.scope{display:flex;margin:20px 0 16px;gap:6px}.scope button{font-size:10px;padding:8px 12px}.scope .selected{background:white;color:#4f3191}.primary-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}article{background:#ffffff1c;border:1px solid #ffffff0b;border-radius:18px;text-align:center;padding:18px 8px;display:flex;flex-direction:column;gap:10px}article span{font-size:11px;line-height:1.8;color:#e4d9f5}article strong{font-size:29px;letter-spacing:-1px}.coral{background:#f05b4c}.white{background:#fff;color:#171326}.white span{color:#494154}.secondary-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.secondary-stats article{padding:12px 8px;gap:3px}.secondary-stats strong{font-size:19px;letter-spacing:0}.history{padding:26px 30px;background:linear-gradient(115deg,#ffffff28,#ffffff08);backdrop-filter:blur(20px);border-top:1px solid #ffffff20}.section-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.section-heading h2{font-size:21px;margin:6px 0}.section-heading>span,footer{font-size:12px;color:#e0cceb}.table-scroll{overflow:auto}table{width:100%;border-collapse:separate;border-spacing:0 7px;text-align:left;white-space:nowrap;font-size:12px}th{font-size:10px;font-weight:400;color:#e0cceb;padding:6px 18px}td{padding:17px 18px;background:#ffffff17}td:first-child{border-radius:13px 0 0 13px}td:last-child{border-radius:0 13px 13px 0}.result{padding:5px 12px;border-radius:20px;font-size:10px;background:#ffffff25}.win{background:#f8836b;color:#271636}.loss{background:#ffffffd9;color:#544077}footer{display:flex;justify-content:space-between;align-items:center;margin-top:15px}footer button{font-size:11px}.signature{display:flex;justify-content:space-between;padding:20px 30px;font-size:9px;letter-spacing:2px;color:#d4b9eb}.signature span{letter-spacing:.5px;opacity:.7}@media(min-width:1450px){.overview{min-height:620px}.hero{min-height:620px}}@media(max-width:1000px){body{padding:20px}.overview{grid-template-columns:45% 55%}.performance{display:none}header{flex-wrap:wrap}.profile{padding-left:15px}.hero{min-height:550px}}@media(max-width:620px){body{padding:0}.dashboard{border-radius:0}header{padding:22px;gap:20px}nav{order:3;width:100%}form{width:100%}input{flex:1;width:120px}#status{padding:0 22px;font-size:9px}.overview{grid-template-columns:1fr}.hero{min-height:390px}.hero>img{object-position:50% 30%}.hero-caption h2{font-size:44px}.profile{padding:20px 22px}.profile h1{font-size:42px}.history{padding:22px 16px}.signature span{display:none}article strong{font-size:30px}}
+
+/* Deadlock-inspired palette: soot, parchment, and aged brass. */
+body{background:#191816;color:#eee5d2}
+.dashboard{background:radial-gradient(ellipse at 25% 48%,#80673933,transparent 48%),radial-gradient(ellipse at 100% 0%,#79705224,transparent 55%),linear-gradient(120deg,#343026,#23221e 68%,#2c2922);box-shadow:0 35px 80px #0006;border:1px solid #514834}
+.brand{color:#e8d8af}.brand span{font-family:Georgia,'Times New Roman',serif}
+nav .active{background:#e8dcc1;color:#29251d}
+input{background:#19181670;border-color:#74644770;color:#eee5d2}input::placeholder{color:#b8ac93}
+button{background:#b3996020;border-color:#ad915448;color:#e8dcc1}
+button:hover:enabled{background:#b3996038;border-color:#ad9154}
+#status,.eyebrow,.hero-caption span{color:#c4b48f}
+.hero>img{mix-blend-mode:normal;filter:saturate(.72) contrast(1.06)}
+.hero-caption{text-shadow:0 2px 18px #15130e}.hero-caption h2,.profile h1{font-family:Georgia,'Times New Roman',serif;color:#f0e5cb}
+.hero-caption p,.subtitle{color:#c8bca2}.ghost{color:#d8bd7a}
+.orbit{border-color:#d8bd7a26}.ring{border-color:#d8bd7a18}
+.orbit-center strong{color:#ead9b0}.orbit-center span,.axis,.chart-note{color:#b8a988}
+.scope .selected{background:#e8dcc1;color:#30291d}
+article{background:#bca16a12;border-color:#bca16a20;border-radius:12px}article span{color:#cbbd9e}
+.coral{background:#a48950;color:#181711}.coral span{color:#272116}
+.white{background:#e8dcc1;color:#211f1a}.white span{color:#514833}
+.history{background:linear-gradient(115deg,#b79b5e16,#ffffff03);border-top-color:#ad915440}
+.section-heading>span,footer,th{color:#b9ac90}
+td{background:#c2a76b10}.result{background:#bca16a24;color:#e8dcc1}
+.win{background:#d2b779;color:#292317}.loss{background:#634038;color:#f2c3b3}
+.signature{color:#bba574}
+button:focus-visible,a:focus-visible,input:focus-visible{outline-color:#d8bd7a}
+/* Center the longer search form on its own header row. */
+header{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+header nav{justify-self:end}
+#search{grid-column:1/-1;justify-self:center;width:min(760px,100%);gap:10px}
+#search input{flex:1;min-width:0;width:auto;padding:16px 20px;font-size:15px}
+#search button{padding:14px 24px;white-space:nowrap;font-weight:600}
+.hero>img{object-fit:contain;object-position:center;filter:none;mask-image:linear-gradient(to bottom,#000 80%,transparent)}
+@media(max-width:620px){header{grid-template-columns:1fr}header nav{justify-self:start;order:0}#search{gap:8px}#search input{padding:14px 12px;font-size:13px}#search button{padding:12px;font-size:12px}}
+/* Carry Sinclair's ink-blue scenery and pale moonlight across the page. */
+body{background:#101116;color:#e1e4db}
+.dashboard{background:radial-gradient(ellipse at 19% 32%,#50586a55,transparent 48%),radial-gradient(ellipse at 75% 0%,#67766e22,transparent 52%),linear-gradient(115deg,#1a1c26,#161920 62%,#1d2328);border-color:#414750;box-shadow:0 35px 80px #0008}
+.hero{background:radial-gradient(ellipse at 55% 40%,#aab7ac14,transparent 70%)}
+.hero>img{mask-image:linear-gradient(to right,transparent,#000 7%,#000 87%,transparent);mask-composite:intersect;-webkit-mask-image:linear-gradient(to right,transparent,#000 7%,#000 87%,transparent),linear-gradient(to bottom,transparent,#000 8%,#000 76%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(to right,transparent,#000 7%,#000 87%,transparent),linear-gradient(to bottom,transparent,#000 8%,#000 76%,transparent);mask-composite:intersect}
+.hero-caption h2,.profile h1{color:#e2e6db}.hero-caption p,.subtitle{color:#b7c0b8}
+#status,.eyebrow,.hero-caption span,.axis,.chart-note{color:#aeb9b5}
+.ghost{color:#a3b0ba}.brand{color:#dde2d7}
+input{background:#10131988;border-color:#68777a66;color:#e1e4db}input::placeholder{color:#a7b2af}
+button{background:#a5b7b412;border-color:#98aaa536;color:#dce2d7}button:hover:enabled{background:#a5b7b428;border-color:#9baea7}
+nav .active,.scope .selected{background:#d5ddd2;color:#20272a}
+article{background:#b1c4bd0c;border-color:#afc0bb20}article span{color:#b6c2bd}
+.coral{background:#728a80;color:#101a17}.coral span{color:#15241e}
+.white{background:#d5ddd2;color:#1c2522}.white span{color:#46564e}
+.orbit{border-color:#b3c5bd25}.ring{border-color:#b3c5bd16}.orbit-center strong{color:#d5ddd2}.orbit-center span{color:#aebfb5}
+.history{background:linear-gradient(115deg,#a7b8c012,#ffffff02);border-top-color:#91a39c30}
+td{background:#b1c2bf0b}.section-heading>span,footer,th{color:#aab9b3}
+.signature{color:#9bada6}.win{background:#a4b9a7;color:#1c2b21}.loss{background:#634038;color:#f2c3b3}
+button:focus-visible,a:focus-visible,input:focus-visible{outline-color:#bacdbd}
+/* Fade the illustrated backdrop into the surrounding slate surface. */
+.hero{background:transparent;isolation:isolate}
+.hero>img{
+  -webkit-mask-image:radial-gradient(ellipse 64% 60% at 53% 43%,#000 35%,#000b 57%,transparent 84%);
+  mask-image:radial-gradient(ellipse 64% 60% at 53% 43%,#000 35%,#000b 57%,transparent 84%);
+  -webkit-mask-composite:source-over;
+  mask-composite:add;
+}
+.hero-caption{z-index:1}
+/* Subdue the baked-in moon backdrop and dissolve it into the page. */
+.hero>img{
+  opacity:.78;
+  mix-blend-mode:luminosity;
+  filter:brightness(.72) contrast(.9);
+  -webkit-mask-image:radial-gradient(ellipse 58% 58% at 52% 43%,#000 18%,#000b 38%,#0005 58%,transparent 78%);
+  mask-image:radial-gradient(ellipse 58% 58% at 52% 43%,#000 18%,#000b 38%,#0005 58%,transparent 78%);
+}
+.hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(90deg,#1c20293b,transparent 35%,#1b1e2766),linear-gradient(0deg,#1b1e27 2%,transparent 40%);
+}
+.hero-caption{z-index:2}
+/* Shared scenery makes the artwork part of the profile, rather than a faded card. */
+.dashboard{background:#121319}
+.overview{
+  position:relative;
+  isolation:isolate;
+  background:#121319;
+}
+.overview::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:linear-gradient(90deg,#12131933,#12131999 50%,#121319 90%),none left center/cover no-repeat;
+  opacity:.55;
+}
+.hero{background:transparent;isolation:auto;overflow:hidden}
+.hero>img{
+  opacity:1;
+  mix-blend-mode:normal;
+  filter:none;
+  object-fit:contain;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 78%,transparent 100%),linear-gradient(0deg,transparent,#000 22%,#000 82%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 10%,#000 78%,transparent 100%),linear-gradient(0deg,transparent,#000 22%,#000 82%,transparent);
+  -webkit-mask-composite:source-in;
+  mask-composite:intersect;
+}
+.hero::after{background:linear-gradient(0deg,#121319,transparent 28%);inset:0}
+.history{background:linear-gradient(120deg,#20232b,#181b22);border-top-color:#87968f20}
+/* One continuous surface from the hero scenery into match history. */
+.overview::before{
+  -webkit-mask-image:linear-gradient(to bottom,#000 55%,transparent 100%);
+  mask-image:linear-gradient(to bottom,#000 55%,transparent 100%);
+}
+.hero>img{
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 78%,transparent),linear-gradient(to bottom,transparent,#000 18%,#000 52%,transparent 100%);
+  mask-image:linear-gradient(90deg,transparent,#000 10%,#000 78%,transparent),linear-gradient(to bottom,transparent,#000 18%,#000 52%,transparent 100%);
+}
+.hero::after{background:linear-gradient(to top,#121319,transparent 48%)}
+.history{
+  background:#121319;
+  border-top:0;
+  backdrop-filter:none;
+  padding-top:32px;
+}
+.history td{background:#b1c2bf06;border-bottom:1px solid #a8b9b10c}
+.history td:first-child,.history td:last-child{border-radius:0}
+.signature{background:#121319}
+/* Longer, softer dissolve on a slightly lighter slate surface. */
+body{background:#181b22}
+.dashboard,.overview,.history,.signature{background:#1d212a}
+.overview::before{
+  background:linear-gradient(90deg,#1d212a33,#1d212a99 50%,#1d212a 90%),none left center/cover no-repeat;
+  opacity:.37;
+  -webkit-mask-image:linear-gradient(to bottom,#000 30%,transparent 100%);
+  mask-image:linear-gradient(to bottom,#000 30%,transparent 100%);
+}
+.hero>img{
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 18%,#000 66%,transparent),linear-gradient(to bottom,transparent,#000 20%,#000 32%,transparent 100%);
+  mask-image:linear-gradient(90deg,transparent,#000 18%,#000 66%,transparent),linear-gradient(to bottom,transparent,#000 20%,#000 32%,transparent 100%);
+}
+.hero::after{background:linear-gradient(to top,#1d212a,transparent 72%)}
+.history td{background:#b1c2bf04;border-bottom-color:#a8b9b108}
+/* Larger character framing, with the existing edge dissolve retained. */
+.hero>img{width:125%;height:125%;left:-12.5%;top:-8%;object-position:center}
+@media(max-width:620px){.hero>img{width:115%;height:115%;left:-7.5%;top:-5%}}
+.match-portrait{width:48px;height:48px;object-fit:cover;border-radius:7px;vertical-align:middle}.match-rank{width:46px;height:46px;object-fit:contain;vertical-align:middle}
+
+/* Round the upper-right silhouette without changing the lower dissolve. */
+.hero>img{
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 18%,#000 66%,transparent),linear-gradient(to bottom,transparent,#000 20%,#000 32%,transparent 100%),radial-gradient(ellipse 100% 95% at 14% 80%,#000 62%,#000c 73%,transparent 88%);
+  mask-image:linear-gradient(90deg,transparent,#000 18%,#000 66%,transparent),linear-gradient(to bottom,transparent,#000 20%,#000 32%,transparent 100%),radial-gradient(ellipse 100% 95% at 14% 80%,#000 62%,#000c 73%,transparent 88%);
+  -webkit-mask-composite:source-in;
+  mask-composite:intersect;
+}
+
+/* Dissolve the upper cutoff gradually while retaining the current framing. */
+.hero>img{
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 18%,#000 74%,transparent),linear-gradient(to bottom,transparent 0%,#0002 8%,#0008 18%,#000 30%,#000 42%,transparent 100%),radial-gradient(ellipse 100% 95% at 24% 80%,#000 62%,#000c 73%,transparent 88%);
+  mask-image:linear-gradient(90deg,transparent,#000 18%,#000 74%,transparent),linear-gradient(to bottom,transparent 0%,#0002 8%,#0008 18%,#000 30%,#000 42%,transparent 100%),radial-gradient(ellipse 100% 95% at 24% 80%,#000 62%,#000c 73%,transparent 88%);
+  -webkit-mask-composite:source-in;
+  mask-composite:intersect;
+}
+
+/* Slightly deeper slate, including the artwork transition. */
+body{background:#14171d}
+.dashboard,.overview,.history,.signature{background:#181c24}
+.overview::before{background:linear-gradient(90deg,#181c2433,#181c2499 50%,#181c24 90%),none left center/cover no-repeat}
+.hero::after{background:linear-gradient(to top,#181c24,transparent 72%)}
+
+/* Use identical alignment for each column's heading and values. */
+.history table{min-width:820px}
+.history th,.history td{text-align:left;vertical-align:middle;padding-left:18px;padding-right:18px}
+.history th:nth-child(2),.history td:nth-child(2),
+.history th:nth-child(4),.history td:nth-child(4),
+.history th:nth-child(5),.history td:nth-child(5){text-align:center}
+.history th:nth-child(7),.history td:nth-child(7),
+.history th:nth-child(8),.history td:nth-child(8){text-align:right;font-variant-numeric:tabular-nums}
+
+/* Clean, consistent match-table typography. */
+.history table{font-family:Inter,'Segoe UI',Arial,sans-serif;font-size:13px;font-variant-numeric:tabular-nums}
+.history th{font-size:11px;font-weight:700;letter-spacing:.07em;color:#c4cec9}
+.history td{font-weight:500;line-height:1.5}
+.history th:first-child,.history td:first-child{text-align:center}
+.history td:first-child{font-weight:650;color:#e0e6e1;white-space:nowrap}
+.history .result{font-weight:700;letter-spacing:.03em}
+#profile-rank{min-height:52px;display:flex;justify-content:center;align-items:center;font-size:12px;color:#b6c2bd}#profile-rank .match-rank{width:64px;height:64px}
+#search-results{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:0 36px}#search-results:empty{display:none}
+
+.secondary-stats article{justify-content:center;align-items:center;text-align:center}
+.player-identity{display:flex;align-items:center;gap:14px;min-width:0}
+.player-identity h1{overflow-wrap:anywhere}
+.player-avatar{width:64px;height:64px;flex-shrink:0;object-fit:cover;border-radius:12px;border:1px solid #91a39c55}
+.player-avatar[hidden]{display:none}
+#search-results button{display:flex;align-items:center;gap:10px;text-align:left}
+.search-avatar{width:36px;height:36px;object-fit:cover;border-radius:7px;flex-shrink:0}
+
+/* Keep Overview and Match history navigation visually consistent. */
+header nav a.active{background:transparent;color:inherit;box-shadow:none}
+.history .history-loading{height:240px;text-align:center;color:#aebfb5;font-weight:500}
+
+/* Neutral scenery shared by every hero, without a Sinclair-specific backdrop. */
+.overview::before{background:radial-gradient(ellipse at 20% 40%,#59657440,transparent 70%)}
+#activity{padding:0 36px;min-height:20px;margin:0;font-size:12px;color:#aeb9b5}#status{white-space:normal}@media(max-width:620px){#activity{padding:0 22px}}
+
+
+/* Hero-specific theme; framing and fade strength remain unchanged. */
+:root{--hero-surface:#181c24;--hero-accent:#b6cbbd}
+body{background:color-mix(in srgb,var(--hero-surface) 78%,#000)}
+.dashboard,.overview,.history,.signature{background:var(--hero-surface)}
+.dashboard{border-color:color-mix(in srgb,var(--hero-accent) 23%,var(--hero-surface))}
+.overview::before{background:radial-gradient(ellipse at 20% 40%,color-mix(in srgb,var(--hero-accent) 19%,transparent),transparent 70%)}
+.hero::after{background:linear-gradient(to top,var(--hero-surface),transparent 72%)}
+.brand,.hero-caption h2,.profile h1,.orbit-center strong{color:var(--hero-accent)}
+#status,.eyebrow,.hero-caption span,.hero-caption p,.subtitle,.axis,.chart-note,.signature{color:color-mix(in srgb,var(--hero-accent) 78%,#aaa)}
+.scope .selected,nav .active,.white{background:var(--hero-accent);color:#171b1d}
+header nav a.active{background:transparent;color:inherit}
+.white span{color:#333d37}
+.coral{background:color-mix(in srgb,var(--hero-accent) 64%,var(--hero-surface));color:#111817}
+article{background:color-mix(in srgb,var(--hero-accent) 7%,var(--hero-surface));border-color:color-mix(in srgb,var(--hero-accent) 15%,transparent)}
+article.white{background:var(--hero-accent)}
+article.coral{background:color-mix(in srgb,var(--hero-accent) 64%,var(--hero-surface))}
+button{background:color-mix(in srgb,var(--hero-accent) 8%,transparent);border-color:color-mix(in srgb,var(--hero-accent) 25%,transparent)}
+button:hover:enabled{background:color-mix(in srgb,var(--hero-accent) 18%,transparent);border-color:var(--hero-accent)}
+button:focus-visible,a:focus-visible,input:focus-visible{outline-color:var(--hero-accent)}
+.orbit svg path{stroke:var(--hero-accent);fill:color-mix(in srgb,var(--hero-accent) 16%,transparent)}
+.orbit,.ring{border-color:color-mix(in srgb,var(--hero-accent) 12%,transparent)}
+@media(prefers-reduced-motion:no-preference){body,.dashboard,.overview,.history,.signature,article,button{transition:background-color .3s ease,color .3s ease,border-color .3s ease}}
+
+/* Echo the actual render's scenery behind the profile to join its colors. */
+.overview{overflow:hidden}
+.overview::before{
+  inset:-45px;
+  background-image:var(--hero-backdrop,none);
+  background-position:left center;
+  background-size:cover;
+  filter:blur(45px);
+  opacity:.2;
+  -webkit-mask-image:linear-gradient(to right,#000,transparent 90%);
+  mask-image:linear-gradient(to right,#000,transparent 90%);
+}
+
+/* A broad feather joins the artwork to the shared scenery without a circular rim. */
+.hero > img {
+  -webkit-mask-image: radial-gradient(ellipse 62% 58% at 50% 44%, #000 12%, #000e 30%, #0009 50%, #0004 70%, #0001 86%, transparent 100%);
+  mask-image: radial-gradient(ellipse 62% 58% at 50% 44%, #000 12%, #000e 30%, #0009 50%, #0004 70%, #0001 86%, transparent 100%);
+  -webkit-mask-composite: source-over;
+  mask-composite: add;
+}
+.overview::before {
+  background-size:cover;
+  filter:blur(55px);
+  opacity:.32;
+  -webkit-mask-image:radial-gradient(ellipse 80% 100% at 18% 38%,#000 15%,transparent 85%);
+  mask-image:radial-gradient(ellipse 80% 100% at 18% 38%,#000 15%,transparent 85%);
+}
+.hero::after {
+  background:radial-gradient(ellipse at 50% 42%,transparent 28%,color-mix(in srgb,var(--hero-surface) 35%,transparent) 65%,var(--hero-surface) 100%);
+}
+/* Full profile artwork layer, with the statistics written over it. */
+.overview{position:relative;isolation:isolate;grid-template-columns:35% 29% 36%;min-height:620px}
+.overview .hero{position:absolute;inset:0;min-height:0;overflow:hidden;z-index:0;pointer-events:none}
+.overview .hero>img{
+  width:85%;height:125%;left:-7%;top:-10%;object-fit:contain;object-position:left center;
+  -webkit-mask-image:linear-gradient(to right,#000 15%,#000e 40%,#0007 65%,transparent 98%),linear-gradient(to bottom,transparent,#000 14%,#000 72%,transparent);
+  mask-image:linear-gradient(to right,#000 15%,#000e 40%,#0007 65%,transparent 98%),linear-gradient(to bottom,transparent,#000 14%,#000 72%,transparent);
+  -webkit-mask-composite:source-in;mask-composite:intersect;
+}
+.overview .hero::after{background:linear-gradient(to right,transparent 30%,color-mix(in srgb,var(--hero-surface) 40%,transparent) 62%,color-mix(in srgb,var(--hero-surface) 75%,transparent))}
+.overview .hero-caption{bottom:25px;left:36px;max-width:32%}
+.overview .performance{grid-column:2;position:relative;z-index:1;text-shadow:0 2px 14px #0008}
+.overview>.profile,.overview>.preview-info{grid-column:3;position:relative;z-index:1;text-shadow:0 2px 14px #0005}
+.overview::before{z-index:-1}
+@media(max-width:1000px){
+  .overview{grid-template-columns:40% 60%}
+  .overview>.profile,.overview>.preview-info{grid-column:2}
+  .overview .hero>img{width:110%;left:-22%;object-position:left center}
+}
+@media(max-width:620px){
+  .overview{display:block;padding-top:300px}
+  .overview .hero{bottom:auto;height:640px}
+  .overview .hero>img{width:130%;height:100%;left:-20%;top:-12%}
+  .overview .hero-caption{top:205px;bottom:auto;left:22px;max-width:85%}
+  .overview .hero-caption h2{font-size:36px}
+  .overview>.profile,.overview>.preview-info{background:linear-gradient(to bottom,transparent,var(--hero-surface) 40%)}
+}
+
+/* Give the character and overlaid profile more horizontal separation. */
+.overview{grid-template-columns:37% 29% 34%}
+.overview .hero>img{left:-14%}
+.overview>.profile,.overview>.preview-info{padding-left:38px;padding-right:22px}
+@media(max-width:1000px){
+  .overview{grid-template-columns:45% 55%}
+  .overview .hero>img{left:-29%}
+  .overview>.profile,.overview>.preview-info{padding-left:24px;padding-right:20px}
+}
+@media(max-width:620px){
+  .overview .hero>img{left:-26%}
+  .overview>.profile,.overview>.preview-info{padding-left:22px;padding-right:22px}
+}
+
+/* Longer vertical feather removes the artwork's top and bottom seams. */
+.overview .hero>img{
+  -webkit-mask-image:
+    linear-gradient(to right,#000 15%,#000e 40%,#0007 65%,transparent 98%),
+    linear-gradient(to bottom,transparent 0%,#0001 6%,#0006 15%,#000d 26%,#000 36%,#000 54%,#000b 66%,#0004 82%,transparent 96%);
+  mask-image:
+    linear-gradient(to right,#000 15%,#000e 40%,#0007 65%,transparent 98%),
+    linear-gradient(to bottom,transparent 0%,#0001 6%,#0006 15%,#000d 26%,#000 36%,#000 54%,#000b 66%,#0004 82%,transparent 96%);
+  -webkit-mask-composite:source-in;
+  mask-composite:intersect;
+}
+.overview .hero::after{
+  background:
+    linear-gradient(to bottom,var(--hero-surface) 0%,transparent 22%,transparent 66%,var(--hero-surface) 100%),
+    linear-gradient(to right,transparent 30%,color-mix(in srgb,var(--hero-surface) 40%,transparent) 62%,color-mix(in srgb,var(--hero-surface) 75%,transparent));
+}
+
+/* Let the artwork rise toward the header with a lighter upper dissolve. */
+.overview{overflow:visible}
+.overview .hero{top:-70px;overflow:visible}
+.overview .hero>img{
+  top:-10%;
+  -webkit-mask-image:
+    linear-gradient(to right,#000 15%,#000e 40%,#0007 65%,transparent 98%),
+    linear-gradient(to bottom,transparent 0%,#0005 5%,#000c 12%,#000 20%,#000 54%,#000b 66%,#0004 82%,transparent 96%);
+  mask-image:
+    linear-gradient(to right,#000 15%,#000e 40%,#0007 65%,transparent 98%),
+    linear-gradient(to bottom,transparent 0%,#0005 5%,#000c 12%,#000 20%,#000 54%,#000b 66%,#0004 82%,transparent 96%);
+}
+.overview .hero::after{
+  background:
+    linear-gradient(to bottom,var(--hero-surface) 0%,transparent 10%,transparent 66%,var(--hero-surface) 100%),
+    linear-gradient(to right,transparent 30%,color-mix(in srgb,var(--hero-surface) 40%,transparent) 62%,color-mix(in srgb,var(--hero-surface) 75%,transparent));
+}
+.dashboard>header,.dashboard>#status,.dashboard>#activity,.dashboard>#search-results{position:relative;z-index:3}
+.overview::before{inset:0;filter:blur(35px)}
+@media(max-width:620px){.overview .hero{top:-35px}.overview .hero>img{top:-8%}}
+
+/* Keep artwork and blurred scenery inside the profile boundaries. */
+.overview{overflow:hidden;overflow:clip}
+.overview .hero{overflow:hidden;overflow:clip}
+
+/* Raise the artwork beneath search while preserving the lower cutoff. */
+.overview{overflow:visible}
+.overview .hero{top:-70px;overflow:hidden;overflow:clip}
+.overview .hero>img{clip-path:inset(0 0 12% 0)}
+.dashboard>header{position:relative;z-index:5}
+#search-results:not(:empty){
+  position:relative;
+  z-index:6;
+  width:min(760px,calc(100% - 72px));
+  margin:0 auto 20px;
+  padding:12px;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  background:color-mix(in srgb,var(--hero-surface) 94%,#fff);
+  border:1px solid color-mix(in srgb,var(--hero-accent) 30%,transparent);
+  border-radius:14px;
+  box-shadow:0 16px 40px #0006;
+}
+#search-results button{width:100%;min-width:0;overflow-wrap:anywhere;padding:12px}
+@media(max-width:620px){
+  .overview .hero{top:-35px}
+  #search-results:not(:empty){width:calc(100% - 44px);grid-template-columns:1fr}
+}
+#search-results:not(:empty){background:color-mix(in srgb,var(--hero-surface) 65%,#000);box-shadow:0 16px 40px #0008}
+
+/* Shift the shared artwork layer farther left. */
+.overview .hero>img{left:-20%}
+@media(max-width:1000px){.overview .hero>img{left:-35%}}
+@media(max-width:620px){.overview .hero>img{left:-32%}}
+
+/* Center every render in a consistent left-side frame. */
+.overview .hero>img{
+  width:66%;
+  height:115%;
+  left:0;
+  top:-8%;
+  object-fit:contain;
+  object-position:center center;
+}
+.overview{grid-template-columns:37% 29% 34%}
+.overview>.profile,.overview>.preview-info{grid-column:3}
+@media(max-width:1000px){
+  .overview{grid-template-columns:45% 55%}
+  .overview .hero>img{width:65%;left:-5%;height:110%;top:-5%}
+  .overview>.profile,.overview>.preview-info{grid-column:2}
+}
+@media(max-width:620px){
+  .overview .hero>img{width:100%;left:0;height:100%;top:-8%}
+}
+
+/* Start the artwork directly below search, without extending into the header. */
+.overview .hero{top:0;overflow:hidden;overflow:clip}
+.overview .hero>img{top:0}
+#activity:empty{min-height:0;margin:0;padding-top:0;padding-bottom:0}
+@media(max-width:1000px){.overview .hero>img{top:0}}
+@media(max-width:620px){.overview .hero{top:0}.overview .hero>img{top:0}}
+
+/* Feather toward search while clipping artwork below its boundary. */
+.overview{overflow:hidden;overflow:clip}
+.overview .hero{top:0;overflow:hidden;overflow:clip}
+.overview .hero>img{
+  top:-7%;
+  -webkit-mask-image:
+    linear-gradient(to right,#000 15%,#000e 40%,#0007 65%,transparent 98%),
+    linear-gradient(to bottom,transparent 0%,#0004 3%,#000b 7%,#000 12%,#000 54%,#000b 66%,#0004 82%,transparent 96%);
+  mask-image:
+    linear-gradient(to right,#000 15%,#000e 40%,#0007 65%,transparent 98%),
+    linear-gradient(to bottom,transparent 0%,#0004 3%,#000b 7%,#000 12%,#000 54%,#000b 66%,#0004 82%,transparent 96%);
+}
+.overview .hero::after{
+  background:
+    linear-gradient(to bottom,var(--hero-surface),transparent 8%,transparent 66%,var(--hero-surface)),
+    linear-gradient(to right,transparent 30%,color-mix(in srgb,var(--hero-surface) 40%,transparent) 62%,color-mix(in srgb,var(--hero-surface) 75%,transparent));
+}
+@media(max-width:1000px){.overview .hero>img{top:-7%}}
+@media(max-width:620px){.overview .hero>img{top:-5%}}
+
+/* Anchor actual artwork at the top instead of centering it in a tall image box. */
+.overview .hero>img{
+  top:0;
+  height:auto;
+  object-position:center top;
+  clip-path:none;
+}
+.dashboard>header{padding-bottom:10px}
+.overview .hero::after{
+  background:
+    linear-gradient(to bottom,var(--hero-surface) 0%,transparent 4%,transparent 72%,var(--hero-surface) 100%),
+    linear-gradient(to right,transparent 30%,color-mix(in srgb,var(--hero-surface) 40%,transparent) 62%,color-mix(in srgb,var(--hero-surface) 75%,transparent));
+}
+@media(max-width:1000px){.overview .hero>img{top:0;height:auto}}
+@media(max-width:620px){.overview .hero>img{top:0;height:auto}}
+
+/* Apply each hero palette in one frame, without staggered color transitions. */
+body,.dashboard,.overview,.history,.signature,article,button{transition:none}
+
+/* Reserve the avatar width and let names scale within the remaining space. */
+.player-identity{width:100%;min-width:0}
+.player-identity h1{flex:1;min-width:0;white-space:nowrap;overflow-wrap:normal;word-break:normal;letter-spacing:-.025em}
+
+/* Frosted match rows only; keep the contents sharp. */
+.history tbody td{
+  background:color-mix(in srgb,var(--hero-accent) 12%,transparent);
+  -webkit-backdrop-filter:blur(20px);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid color-mix(in srgb,var(--hero-accent) 10%,transparent);
+}
+.history tbody td:first-child{border-radius:14px 0 0 14px}
+.history tbody td:last-child{border-radius:0 14px 14px 0}
+.history tbody tr:hover td{background:color-mix(in srgb,var(--hero-accent) 17%,transparent)}

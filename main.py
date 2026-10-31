@@ -54,12 +54,28 @@ async def get_player_matches(
                 raise HTTPException(status_code=404, detail="Player match history is unavailable.")
             if response.status_code != 200:
                 raise HTTPException(status_code=502, detail="Match history could not be loaded. Please try again.")
+            raw_matches = response.json()
             matches = sorted(
-                select_matches(response.json(), scope),
+                select_matches(raw_matches, scope),
                 key=lambda match: (match["start_time"], match.get("match_id", 0)),
                 reverse=True,
             )
             total = len(matches)
+            ranked_badges = [
+                match["ranked_display_badge"] for match in matches
+                if match.get("match_mode") == RANKED_MATCH_MODE
+                and type(match.get("ranked_display_badge")) is int
+                and 10 <= match["ranked_display_badge"] <= 126
+                and match["ranked_display_badge"] % 10 <= 6
+            ]
+            rank_badge = (max(ranked_badges) if scope == "all" else ranked_badges[0]) if ranked_badges else None
+            all_time_badges = [
+                match["ranked_display_badge"] for match in raw_matches
+                if match.get("match_mode") == RANKED_MATCH_MODE
+                and type(match.get("ranked_display_badge")) is int
+                and 10 <= match["ranked_display_badge"] <= 126
+                and match["ranked_display_badge"] % 10 <= 6
+            ]
             start = (page - 1) * page_size
             selected = matches[start:start + page_size]
             heroes = {}
@@ -76,9 +92,13 @@ async def get_player_matches(
                 "accountId": str(account_id), "scope": scope, "page": page,
                 "pageSize": page_size, "totalMatches": total,
                 "totalPages": (total + page_size - 1) // page_size,
+                "rankBadge": rank_badge,
+                "highestRankBadge": max(all_time_badges, default=None),
                 "matches": [
                     {
                         "matchId": match.get("match_id"),
+                        "heroId": match.get("hero_id"),
+                        "rankedBadge": match.get("ranked_display_badge") if match.get("match_mode") == RANKED_MATCH_MODE else None,
                         "startTime": match["start_time"],
                         "heroName": heroes.get(str(match.get("hero_id")), f"Hero {match.get('hero_id', '?')}"),
                         "mode": modes.get(match.get("match_mode"), "Unknown"),

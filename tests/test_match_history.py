@@ -14,6 +14,30 @@ def match(match_id, mode=4, start=None, outcome=1):
 
 
 class MatchHistoryTests(unittest.TestCase):
+    def test_profile_rank_uses_peak_for_all_and_latest_within_season(self):
+        matches = [
+            {**match(1, start=main.SEASON_1_START - 1), "ranked_display_badge": 116},
+            {**match(2), "ranked_display_badge": 95},
+            {**match(3), "ranked_display_badge": 83},
+            {**match(4, mode=1), "ranked_display_badge": 126},
+            match(5),
+        ]
+        self.assertEqual(self.request(matches, "scope=all&page=2&page_size=1").json()["rankBadge"], 116)
+        self.assertEqual(self.request(matches, "scope=season1").json()["rankBadge"], 83)
+        self.assertEqual(self.request(matches, "scope=season1").json()["highestRankBadge"], 116)
+        self.assertEqual(self.request(matches, "scope=all&page=2&page_size=1").json()["highestRankBadge"], 116)
+        self.assertIsNone(self.request([match(1)]).json()["rankBadge"])
+
+    def test_rank_badge_is_only_exposed_for_ranked_matches(self):
+        ranked = {**match(1), "ranked_display_badge": 83}
+        unranked = {**match(2, mode=1), "ranked_display_badge": 83}
+        missing = match(3)
+        rows = {m["matchId"]: m for m in self.request([ranked, unranked, missing]).json()["matches"]}
+        self.assertEqual(rows[1]["rankedBadge"], 83)
+        self.assertIsNone(rows[2]["rankedBadge"])
+        self.assertIsNone(rows[3]["rankedBadge"])
+        self.assertEqual(rows[1]["heroId"], 99)
+
     def setUp(self):
         self.client = TestClient(main.app)
 

@@ -1,0 +1,310 @@
+[
+    {
+        "name":  "Infernus",
+        "id":  1,
+        "image":  "assets/renders/1.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/inferno_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Infernus_Render.png"
+    },
+    {
+        "name":  "Seven",
+        "id":  2,
+        "image":  "assets/renders/2.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/gigawatt_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Seven_Render.png"
+    },
+    {
+        "name":  "Vindicta",
+        "id":  3,
+        "image":  "assets/renders/3.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/hornet_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Vindicta_Render.png"
+    },
+    {
+        "name":  "Lady Geist",
+        "id":  4,
+        "image":  "assets/renders/4.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/spectre_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Lady_Geist_Render.png"
+    },
+    {
+        "name":  "Abrams",
+        "id":  6,
+        "image":  "assets/renders/6.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/bull_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Abrams_Render.png"
+    },
+    {
+        "name":  "Wraith",
+        "id":  7,
+        "image":  "assets/renders/7.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/wraith_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Wraith_Render.png"
+    },
+    {
+        "name":  "McGinnis",
+        "id":  8,
+        "image":  "assets/renders/8.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/engineer_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/McGinnis_Render.png"
+    },
+    {
+        "name":  "Paradox",
+        "id":  10,
+        "image":  "assets/renders/10.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/chrono_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Paradox_Render.png"
+    },
+    {
+        "name":  "Dynamo",
+        "id":  11,
+        "image":  "assets/renders/11.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/sumo_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Dynamo_Render.png"
+    },
+    {
+        "name":  "Kelvin",
+        "id":  12,
+        "image":  "assets/renders/12.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/kelvin_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Kelvin_Render.png"
+    },
+    {
+        "name":  "Haze",
+        "id":  13,
+        "image":  "assets/renders/13.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/haze_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Haze_Render.png"
+    },
+    {
+        "name":  "Holliday",
+        "id":  14,
+        "image":  "assets/renders/14.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/astro_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Holliday_Render.png"
+    },
+    {
+        "name":  "Bebop",
+        "id":  15,
+        "image":  "assets/renders/15.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/bebop_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Bebop_Render.png"
+    },
+    {
+        "name":  "Calico",
+        "id":  16,
+        "image":  "assets/renders/16.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/nano_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Calico_Render.png"
+    },
+    {
+        "name":  "Grey Talon",
+        "id":  17,
+        "image":  "assets/renders/17.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/archer_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Grey_Talon_Render.png"
+    },
+    {
+        "name":  "Mo \u0026 Krill",
+        "id":  18,
+        "image":  "assets/renders/18.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/digger_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Mo_%26_Krill_Render.png"
+    },
+    {
+        "name":  "Shiv",
+        "id":  19,
+        "image":  "assets/renders/19.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/shiv_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Shiv_Render.png"
+    },
+    {
+        "name":  "Ivy",
+        "id":  20,
+        "image":  "assets/renders/20.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/tengu_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Ivy_Render.png"
+    },
+    {
+        "name":  "Warden",
+        "id":  25,
+        "image":  "assets/renders/25.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/warden_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Warden_Render.png"
+    },
+    {
+        "name":  "Yamato",
+        "id":  27,
+        "image":  "assets/renders/27.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/yamato_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Yamato_Render.png"
+    },
+    {
+        "name":  "Lash",
+        "id":  31,
+        "image":  "assets/renders/31.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/lash_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Lash_Render.png"
+    },
+    {
+        "name":  "Viscous",
+        "id":  35,
+        "image":  "assets/renders/35.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/viscous_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Viscous_Render.png"
+    },
+    {
+        "name":  "Pocket",
+        "id":  50,
+        "image":  "assets/renders/50.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/synth_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Pocket_Render.png"
+    },
+    {
+        "name":  "Mirage",
+        "id":  52,
+        "image":  "assets/renders/52.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/mirage_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Mirage_Render.png"
+    },
+    {
+        "name":  "Vyper",
+        "id":  58,
+        "image":  "assets/renders/58.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/kali_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Vyper_Render.png"
+    },
+    {
+        "name":  "Sinclair",
+        "id":  60,
+        "image":  "assets/renders/60.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/magician_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Sinclair_Render.png"
+    },
+    {
+        "name":  "Mina",
+        "id":  63,
+        "image":  "assets/renders/63.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/vampirebat_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Mina_Render.png"
+    },
+    {
+        "name":  "Drifter",
+        "id":  64,
+        "image":  "assets/renders/64.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/drifter_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Drifter_Render.png"
+    },
+    {
+        "name":  "Venator",
+        "id":  65,
+        "image":  "assets/renders/65.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/priest_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Venator_Render.png"
+    },
+    {
+        "name":  "Victor",
+        "id":  66,
+        "image":  "assets/renders/66.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/frank_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Victor_Render.png"
+    },
+    {
+        "name":  "Paige",
+        "id":  67,
+        "image":  "assets/renders/67.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/bookworm_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Paige_Render.png"
+    },
+    {
+        "name":  "The Doorman",
+        "id":  69,
+        "image":  "assets/renders/69.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/doorman_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/The_Doorman_Render.png"
+    },
+    {
+        "name":  "Billy",
+        "id":  72,
+        "image":  "assets/renders/72.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/punkgoat_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Billy_Render.png"
+    },
+    {
+        "name":  "Graves",
+        "id":  76,
+        "image":  "assets/renders/76.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/necro_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Graves_Render.png"
+    },
+    {
+        "name":  "Apollo",
+        "id":  77,
+        "image":  "assets/renders/77.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/fencer_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Apollo_Render.png"
+    },
+    {
+        "name":  "Deadman Danny",
+        "id":  78,
+        "image":  "assets/renders/78.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/deadpack_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Deadman_Danny_Render.png"
+    },
+    {
+        "name":  "Rem",
+        "id":  79,
+        "image":  "assets/renders/79.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/familiar_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Rem_Render.png"
+    },
+    {
+        "name":  "Silver",
+        "id":  80,
+        "image":  "assets/renders/80.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/werewolf_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Silver_Render.png"
+    },
+    {
+        "name":  "Celeste",
+        "id":  81,
+        "image":  "assets/renders/81.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/unicorn_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Celeste_Render.png"
+    },
+    {
+        "name":  "Rat King",
+        "id":  84,
+        "image":  "assets/renders/84.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/ratking_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Rat_King_Render.png"
+    },
+    {
+        "name":  "Solomon",
+        "id":  85,
+        "image":  "assets/renders/85.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/chessmaster_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Solomon_Render.png"
+    },
+    {
+        "name":  "Violet",
+        "id":  86,
+        "image":  "assets/renders/86.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/artist_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Violet_Render.png"
+    },
+    {
+        "name":  "Nurse Harrow",
+        "id":  87,
+        "image":  "assets/renders/87.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/nurse_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Nurse_Harrow_Render.png"
+    },
+    {
+        "name":  "Baba",
+        "id":  88,
+        "image":  "assets/renders/88.webp",
+        "fallbackImage":  "https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/baba_card.webp",
+        "renderSource":  "https://cdn.deadlock.wiki/Baba_Render.png"
+    }
+]
