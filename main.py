@@ -127,14 +127,34 @@ async def root():
 
 @app.get("/api/player/search")
 async def search_players(query: str = Query(min_length=1, max_length=100)):
+    query = query.strip()
+    if not query:
+        raise HTTPException(status_code=422, detail="Enter a player name.")
     async with httpx.AsyncClient() as client:
         try:
             response = await client.get(
                 "https://api.deadlock-api.com/v1/players/steam-search",
-                params={"search_query": query, "limit": 10},
+                params={
+                    "search_query": query,
+                    "limit": 100,
+                    "min_matches_played_last_30d": 0,
+                    "matches_played_weight": 0,
+                },
             )
-            if response.status_code != 200:
+            if response.status_code == 404:
                 raise HTTPException(status_code=404, detail="No Steam players found.")
+            if response.status_code != 200:
+                raise HTTPException(status_code=502, detail="Player search is temporarily unavailable.")
+            # Stable sort keeps the upstream similarity order within each group.
+            normalized_query = query.casefold()
+            players = sorted(
+                response.json(),
+                key=lambda player: (
+                    player["personaname"].casefold() != normalized_query,
+                    not player["personaname"].casefold().startswith(normalized_query),
+                    normalized_query not in player["personaname"].casefold(),
+                ),
+            )[:10]
             return {
                 "players": [
                     {
@@ -142,7 +162,7 @@ async def search_players(query: str = Query(min_length=1, max_length=100)):
                         "playerName": player["personaname"],
                         "avatar": player["avatar"],
                     }
-                    for player in response.json()
+                    for player in players
                 ]
             }
         except HTTPException:
