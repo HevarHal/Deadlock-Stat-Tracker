@@ -1,159 +1,126 @@
 # Deadlock Stat Tracker
 
-A full-stack Deadlock dashboard for searching Steam players and exploring their match performance. Built with React, Vite, FastAPI, and PostgreSQL, and deployed on AWS EC2 with Docker Compose and Caddy.
+A Deadlock player dashboard with hero-based themes, high-resolution artwork, ranked statistics, and paginated match history. Built with FastAPI, PostgreSQL, and a lightweight JavaScript frontend powered by Vite.
 
-## Live Demo
+**Live site:** [deadlocktracker.ca](https://deadlocktracker.ca)
 
-**[Launch Deadlock Tracker](https://www.deadlocktracker.ca/)**
+## Demo
 
-[![Animated demo showing player search and switching between Season 1 and All Matches](docs/demo.gif)](https://www.deadlocktracker.ca/)
+![Player lookup, All Matches statistics, and Season 1 ranked statistics](docs/demo.gif)
 
-Search for a Steam player, select a result, and switch between **Season 1** and **All Matches**. Click the preview to try the live application.
+The demo uses a public account and shows the deployed dashboard. Statistics change as new matches become available.
+
+[View the full dashboard screenshot](docs/dashboard.png).
 
 ## Features
 
-- Steam player search with names and avatars.
-- **Season 1:** ranked matches within the configured Season 1 dates.
-- **All Matches:** every match mode available in the player's returned history, across all dates.
-- Total matches, wins, losses, win rate, K/D ratio, and average souls per match.
-- Match history below the stats: newest first, 20 per page, with hero, mode, result, K/D/A, souls, duration, and match ID. Dates use the viewer's local time.
-- Most-played heroes for the selected scope and overall history.
-- PostgreSQL storage for calculated Season 1 statistics, with conditional cache reuse.
-- HTTPS certificates, renewal, and domain redirects managed by Caddy.
+- Search Steam players by name or account ID, with avatars in name-search results.
+- Switch between All Matches and Season 1 ranked statistics.
+- View match totals, wins, losses, win rate, kill/death ratio, average souls, and unscored matches.
+- Display the most-played hero for the selected scope, with compressed WebP renders and artwork-matched themes.
+- Show the highest recorded rank across available history for All Matches, or the latest reported rank within Season 1.
+- Browse match history with hero portraits, per-game rank badges, outcomes, K/D/A, souls, and duration.
+- Keep profile statistics visible while refreshing match history when changing scope.
+- Cache Season 1 summary statistics in PostgreSQL.
 
-## How Stats Are Calculated
+Rank badges depend on upstream availability. Missing badges display as unavailable; all-time rank means the highest rank in the match history returned by the API, not a guaranteed complete career record. Win rate uses decided wins and losses, while total matches includes all outcomes.
 
-| Metric | Calculation |
-| --- | --- |
-| Total Matches | Every match in the selected scope, including unknown and unscored outcomes |
-| Wins / Losses | Matches with player outcome codes `1` / `2` |
-| Win Rate | Wins divided by wins plus losses; unknown and unscored outcomes are excluded |
-| K/D Ratio | Total kills divided by total deaths across the selected matches; total kills if there are no deaths |
-| Avg Souls / Match | Average reported `net_worth` across the selected matches |
-| Unscored | Outcomes other than win/loss within the last 90 days, limited to the selected scope |
+## Run with Docker
 
-Total Matches can exceed Wins + Losses + Unscored because the Unscored card uses a 90-day window. K/D and average souls include all selected matches, including those without a scored outcome.
+Install Docker with Compose, then run from the repository root:
 
-The current Season 1 filter runs from **July 30, 2026 at 17:00 UTC**, inclusive, to **November 5, 2026 at 05:00 UTC**, exclusive. These boundaries and ranked mode (`match_mode = 4`) are configured in `main.py`.
-
-Stats reflect the history returned by the community API. Missing or delayed upstream matches can affect totals; this dashboard does not guarantee complete or real-time Steam history.
-
-## Project Structure
-
-```text
-.
-|-- main.py                         # FastAPI routes, filtering, and calculations
-|-- database.py                     # SQLAlchemy model and database initialization
-|-- requirements.txt                # Python dependencies
-|-- compose.yaml                    # Active production service configuration
-|-- Caddyfile                       # HTTPS proxy and domain redirects
-|-- Dockerfile                      # Backend image
-|-- .env.example                    # Example local database connection string
-|-- tests/test_summary_status.py    # Backend regression tests
-|-- docs/demo.gif                   # README demo animation
-`-- deadlock-dashboard/             # React + Vite frontend and Nginx image
+```sh
+docker compose up -d --build
 ```
 
-## Production Deployment
+Open the dashboard at [localhost:3000](http://localhost:3000) and the backend API documentation at [localhost:8000/docs](http://localhost:8000/docs).
 
-Requires Docker Engine with Docker Compose. The current `compose.yaml` runs PostgreSQL 16, FastAPI, the frontend's Nginx server, and Caddy. The container builds use Python 3.12 and Node.js 22.
+The local development Compose file provides a development database password. Production deployments require `POSTGRES_PASSWORD` in `.env` and may use Caddy for HTTPS. Keep the configuration appropriate to your environment; the local test Compose configuration should not replace production settings.
 
-Create an untracked `.env` file at the repository root containing:
-
-```dotenv
-POSTGRES_PASSWORD=REPLACE_WITH_A_LONG_RANDOM_HEX_PASSWORD
-```
-
-Replace the placeholder before starting. The production configuration requires this value and supplies `DATABASE_URL` to the backend automatically. `.env.example` contains a connection string for running Python directly; it does not supply the Compose password.
-
-For a deployment on your own domain, update the domains in `Caddyfile`, point their DNS records to the server, and allow inbound TCP ports **80** and **443**. Restrict SSH port **22** to trusted IP addresses. Keep database and backend ports private.
-
-From the repository root:
-
-```bash
-docker compose up --build -d
-docker compose ps
+```sh
 docker compose logs --tail=100
-```
-
-The frontend is available on the server at `http://127.0.0.1:3000`; Caddy serves public domain traffic over HTTPS. The backend is bound to `127.0.0.1:8000`, with interactive API docs at `http://127.0.0.1:8000/docs` on the server. PostgreSQL has no published host port.
-
-Caddy persists certificates in `caddy_data`, and PostgreSQL persists data in `postgres_data`. Services use `restart: unless-stopped`.
-
-```bash
-# Rebuild after application changes
-docker compose up --build -d
-
-# Inspect application logs
-docker compose logs --tail=100 backend frontend caddy
-
-# Stop the stack while retaining data
+docker compose logs --tail=100 -f backend
 docker compose down
 ```
 
-Do not add `-v` to the stop command unless you intend to delete the persistent volumes, including database data and certificates.
+The PostgreSQL named volume persists when stopping the stack. `docker compose down -v` deletes that volume and its data.
 
-## Local Development
+## Development
 
-Use Python 3.12, Node.js 22.12 or newer, and a separately accessible PostgreSQL instance. The production Compose database is private to its Docker network, so Python running on your host cannot reach it through `localhost:5432` by default.
+Use Python 3.12 and Node.js 22, matching the Docker images, plus a running PostgreSQL database.
 
-### Backend
-
-PowerShell example, from the repository root:
+### Backend (PowerShell)
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-$env:DATABASE_URL = "postgresql+psycopg2://postgres:YOUR_PASSWORD@127.0.0.1:5432/deadlock"
+$env:DATABASE_URL = "postgresql+psycopg2://postgres:your-password@127.0.0.1:5432/deadlock"
 python -m uvicorn main:app --reload
 ```
 
-Create the `deadlock` database in your local PostgreSQL instance first. The backend creates its tables on startup. Set `DATABASE_URL` in the shell before starting; the application does not load a `.env` file itself.
-
-On Linux/macOS, activate with `source .venv/bin/activate` and set the connection string using `export DATABASE_URL='...'`.
+`DATABASE_URL` must be present in the process environment. `.env.example` documents its format; the Python application does not automatically load that file.
 
 ### Frontend
 
-In a second terminal:
-
-```bash
+```sh
 cd deadlock-dashboard
 npm ci
 npm run dev
 ```
 
-Vite is configured for **http://localhost:3000** and proxies `/api` requests to `http://127.0.0.1:8000`. If port 3000 is occupied, use the URL Vite prints or stop the service using that port.
+Vite uses port 3000 and proxies `/api` to `http://127.0.0.1:8000`. Stop the Docker frontend first if it already occupies port 3000, or choose another port with `npm run dev -- --port 3001`.
 
-```bash
-npm run lint
+```sh
 npm run build
+npm run lint
 ```
 
-## API Routes
+### Backend tests
 
-| Route | Purpose |
-| --- | --- |
-| `GET /` | Basic backend status response |
-| `GET /api/player/search?query=<name>` | Search Steam players by name |
-| `GET /api/player/{account_id}/summary?scope=season1` | Season 1 ranked statistics; default scope |
-| `GET /api/player/{account_id}/summary?scope=all` | Statistics for all returned match modes and dates |
-| `GET /api/player/{account_id}/matches?scope=season1&page=1&page_size=20` | Paginated match history; supports `scope=all`, with page size limited to 100 |
+From the repository root, with the Python dependencies installed:
 
-Public `/api` requests pass through Caddy and the frontend's Nginx proxy. The root status route and `/docs` are accessed directly through the backend, not the public frontend root.
-
-## Backend Tests
-
-With Python dependencies installed, run from the repository root:
-
-```bash
+```sh
 python -m unittest discover -s tests -v
 ```
 
-The tests mock upstream responses and database access. They cover inclusion of unranked matches in All Matches, exclusion from Season 1, unknown-outcome totals and win rates, and missing upstream profiles.
+Tests mock upstream requests and use an in-memory database configuration.
 
-## Configuration and Data
+## API
 
-Keep `.env`, private keys, credentials, and database backups out of Git. Changing `POSTGRES_PASSWORD` after PostgreSQL has initialized does not automatically change the existing database user's password.
+| Route | Purpose |
+| --- | --- |
+| `GET /` | Backend health status |
+| `GET /api/player/search?query=<name>` | Steam player lookup |
+| `GET /api/player/{account_id}/summary?scope=all` | Summary statistics |
+| `GET /api/player/{account_id}/matches?scope=season1&page=1&page_size=20` | Paginated matches and profile rank metadata |
 
-Player search, match history, and hero information come from the community [Deadlock API](https://deadlock-api.com/). This is an independent project, not an official Valve service.
+Supported scopes are `all` and `season1`. Match pages start at 1; page size is between 1 and 100. Interactive route documentation is available at `/docs` on the backend.
+
+## Project structure
+
+```text
+main.py                              FastAPI routes and statistics
+ database.py                         SQLAlchemy models and database setup
+ tests/                              Backend regression tests
+ deadlock-dashboard/
+   index.html                        Dashboard markup
+   src/profile-app.js                Player search and dashboard behavior
+   src/hero-theme.js                 Hero palette application
+   src/hero-palettes.json            Colors sampled from hero artwork
+   public/dashboard.css              Layout, artwork blending, and table styles
+   public/assets/                    Hero catalogs, rank metadata, and WebP renders
+ docs/                               Demo animation and screenshot
+```
+
+## Data and artwork
+
+Player data comes from the [Deadlock API](https://deadlock-api.com/). Hero renders originate from the [Deadlock Wiki](https://deadlock.wiki/) and are converted to WebP; small API card portraits are retained as fallbacks. See [artwork sources](deadlock-dashboard/public/assets/SOURCES.md).
+
+The bundled image catalogs contain 44 released heroes as verified on October 30, 2026. Refresh the catalogs and palettes when the roster changes.
+
+Deadlock and its game artwork belong to Valve. This is an independent community project.
+
+## Configuration
+
+Keep `.env`, SSH keys, credentials, dependency folders, and database dumps out of Git. Frontend production output is generated in `deadlock-dashboard/dist/`. Production Compose and Caddy settings should remain specific to the deployment.
