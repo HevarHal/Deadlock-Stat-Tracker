@@ -10,8 +10,6 @@ A Deadlock player dashboard with hero-based themes, high-resolution artwork, ran
 
 The demo uses a public account and shows the deployed dashboard. Statistics change as new matches become available.
 
-[View the full dashboard screenshot](docs/dashboard.png).
-
 ## Features
 
 - Search Steam players by name or account ID, with avatars in name-search results.
