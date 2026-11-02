@@ -18,10 +18,19 @@ The demo uses a public account and shows the deployed dashboard. Statistics chan
 - Display the most-played hero for the selected scope, with compressed WebP renders and artwork-matched themes.
 - Show the highest recorded rank across available history for All Matches, or the latest reported rank within Season 1.
 - Browse match history with hero portraits, per-game rank badges, outcomes, K/D/A, souls, and duration.
+- Expand a match to view a centered, wrapping item timeline grouped into five-minute intervals, using in-game shop icons.
+- Show actual item sales as crossed-out icons at the time of sale; components consumed by upgrades are not reported as sold.
+- View the starting build guide's name, build ID, and description when available.
+- Copy build and match IDs with one click; the confirmation clears after one second.
+- Remember the selected player, scope, history page, search text, and scroll position for the current tab. Refresh reloads the same view.
 - Keep profile statistics visible while refreshing match history when changing scope.
 - Cache Season 1 summary statistics in PostgreSQL.
 
 Rank badges depend on upstream availability. Missing badges display as unavailable; all-time rank means the highest rank in the match history returned by the API, not a guaranteed complete career record. Win rate uses decided wins and losses, while total matches includes all outcomes.
+
+Item timelines and starting guides depend on available match metadata and processed replay data. The recorded guide is the one selected at match start; later guide switches are not recorded, and the available guide may have changed since the match. Missing data is shown as unavailable, with retry controls for failed requests.
+
+Tab memory uses browser `sessionStorage`, rather than permanently saving the view. A new independent tab starts fresh; browser tab-restoration features may restore saved state. Refreshing reloads player data through the existing API routes; it does not add a new database cache policy.
 
 ## Run with Docker
 
@@ -33,7 +42,7 @@ docker compose up -d --build
 
 Open the dashboard at [localhost:3000](http://localhost:3000) and the backend API documentation at [localhost:8000/docs](http://localhost:8000/docs).
 
-The local development Compose file provides a development database password. Production deployments require `POSTGRES_PASSWORD` in `.env` and may use Caddy for HTTPS. Keep the configuration appropriate to your environment; the local test Compose configuration should not replace production settings.
+Compose requires `POSTGRES_PASSWORD` in `.env`. The frontend and backend ports bind to localhost, while Caddy provides public HTTP/HTTPS access. Adjust the Caddy hostname and production settings for your environment; do not replace a running deployment's environment or database volumes when updating application code.
 
 ```sh
 docker compose logs --tail=100
@@ -72,7 +81,10 @@ Vite uses port 3000 and proxies `/api` to `http://127.0.0.1:8000`. Stop the Dock
 ```sh
 npm run build
 npm run lint
+npm test
 ```
+
+Frontend tests cover purchase/sale timeline grouping, tab-state validation, and shared number/time formatting.
 
 ### Backend tests
 
@@ -82,7 +94,7 @@ From the repository root, with the Python dependencies installed:
 python -m unittest discover -s tests -v
 ```
 
-Tests mock upstream requests and use an in-memory database configuration.
+Tests mock upstream requests and database access. They cover search ordering, statistics, scope filtering, pagination, rank badges, item purchases versus upgrade consumption, and missing guide or match data.
 
 ## API
 
@@ -92,23 +104,30 @@ Tests mock upstream requests and use an in-memory database configuration.
 | `GET /api/player/search?query=<name>` | Steam player lookup |
 | `GET /api/player/{account_id}/summary?scope=all` | Summary statistics |
 | `GET /api/player/{account_id}/matches?scope=season1&page=1&page_size=20` | Paginated matches and profile rank metadata |
+| `GET /api/player/{account_id}/matches/{match_id}/build` | Item purchase timeline and available starting build guide |
 
 Supported scopes are `all` and `season1`. Match pages start at 1; page size is between 1 and 100. Interactive route documentation is available at `/docs` on the backend.
 
 ## Project structure
 
 ```text
-main.py                              FastAPI routes and statistics
- database.py                         SQLAlchemy models and database setup
- tests/                              Backend regression tests
- deadlock-dashboard/
-   index.html                        Dashboard markup
-   src/profile-app.js                Player search and dashboard behavior
-   src/hero-theme.js                 Hero palette application
-   src/hero-palettes.json            Colors sampled from hero artwork
-   public/dashboard.css              Layout, artwork blending, and table styles
-   public/assets/                    Hero catalogs, rank metadata, and WebP renders
- docs/                               Demo animation and screenshot
+main.py                              Player search, match history, and summary routes
+database.py                          SQLAlchemy models and database setup
+match_details.py                     Item timelines and starting build-guide route
+tests/                               Backend regression tests
+deadlock-dashboard/
+  index.html                         Dashboard markup
+  src/profile-app.js                 Player search, loading, and page coordination
+  src/match-table.js                 Match rows, portraits, and rank rendering
+  src/match-build.js                 Expandable timelines and ID copy controls
+  src/tab-state.js                   Per-tab view persistence
+  src/format.js                      Shared number and time formatting
+  src/hero-theme.js                  Hero palette application
+  src/hero-palettes.json             Colors sampled from hero artwork
+  tests/                             Frontend regression tests
+  public/dashboard.css              Layout, responsive styles, and match panels
+  public/assets/                    Hero catalogs, rank metadata, and WebP renders
+docs/                                Demo animation and screenshot
 ```
 
 ## Data and artwork

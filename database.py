@@ -1,7 +1,8 @@
 import datetime
 import os
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, text # type: ignore
-from sqlalchemy.orm import declarative_base, sessionmaker # type: ignore
+
+from sqlalchemy import Column, DateTime, Float, Integer, String, create_engine, text
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 # Targets the database running inside your Docker container
 DATABASE_URL = os.environ["DATABASE_URL"]
@@ -9,6 +10,7 @@ DATABASE_URL = os.environ["DATABASE_URL"]
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
 
 class PlayerStat(Base):
     __tablename__ = "player_stats"
@@ -28,22 +30,29 @@ class PlayerStat(Base):
     overall_hero = Column(String)
     overall_hero_matches = Column(Integer)
     season = Column(String)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    updated_at = Column(
+        DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow
+    )
+
 
 def init_db():
     Base.metadata.create_all(bind=engine)
     with engine.begin() as connection:
         table_exists = connection.execute(
-            text("SELECT 1 FROM information_schema.tables WHERE table_name = 'player_stats' AND table_schema = 'public'")
+            text(
+                "SELECT 1 FROM information_schema.tables WHERE table_name = 'player_stats' AND table_schema = 'public'"
+            )
         ).first()
-    
 
         if not table_exists:
             return
 
         existing_columns = {
-            row[0] for row in connection.execute(
-                text("SELECT column_name FROM information_schema.columns WHERE table_name = 'player_stats' AND table_schema = 'public'")
+            row[0]
+            for row in connection.execute(
+                text(
+                    "SELECT column_name FROM information_schema.columns WHERE table_name = 'player_stats' AND table_schema = 'public'"
+                )
             )
         }
 
@@ -67,5 +76,7 @@ def init_db():
         for column_name, column_type in column_definitions.items():
             if column_name not in existing_columns:
                 connection.execute(
-                    text(f"ALTER TABLE player_stats ADD COLUMN IF NOT EXISTS {column_name} {column_type}")
+                    text(
+                        f"ALTER TABLE player_stats ADD COLUMN IF NOT EXISTS {column_name} {column_type}"
+                    )
                 )

@@ -9,5 +9,13 @@ Scripts
 __pycache__
 *.py[cod]
 node_modules
-deadlock-dashboard/node_modules
-deadlock-dashboard/dist
+deadlock-dashboard
+docs
+tests
+.codex
+.copilot
+.tmp-*
+.ruff_cache
+.pytest_cache
+*.log
+*.tar.gz
