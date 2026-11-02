@@ -1,37 +1,95 @@
 import logging
 import time
+from contextlib import asynccontextmanager
+from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
 import httpx
-import pandas as pd
-from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Path, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from starlette.concurrency import run_in_threadpool
 
 from database import PlayerStat, SessionLocal, init_db
 from match_details import router as match_details_router
+from metrics import calculate_metrics, most_played_hero
+from upstream import (
+    API_BASE,
+    MATCH_CACHE_SECONDS,
+    REQUEST_TIMEOUT_SECONDS,
+    UpstreamClient,
+    client_for,
+    fetch_hero_names,
+)
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Deadlock Live Analytics Pipeline")
+
+@asynccontextmanager
+async def lifespan(app):
+    await run_in_threadpool(init_db)
+    async with httpx.AsyncClient(timeout=REQUEST_TIMEOUT_SECONDS) as client:
+        app.state.upstream = UpstreamClient(client)
+        try:
+            yield
+        finally:
+            await app.state.upstream.close()
+            del app.state.upstream
+
+
+app = FastAPI(title="Deadlock Live Analytics Pipeline", lifespan=lifespan)
 app.include_router(match_details_router)
 
-# Boots up database structures inside Docker on app launch
-init_db()
-origins = ["http://localhost:3000"]
+# Permit the deployed frontend; development uses Vite's same-origin API proxy.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["https://deadlocktracker.ca"],
+    allow_credentials=False,
+    allow_methods=["GET"],
+    allow_headers=["Content-Type"],
 )
 
-SEASON_1 = "season_1_player_outcomes_v8"
+SEASON_1_CACHE_VERSION = "season_1_player_outcomes_v9"
 SEASON_1_START = 1785430800
 SEASON_1_END = 1793854800
 RANKED_MATCH_MODE = 4
+STREET_BRAWL_GAME_MODE = 4
 UNSCORED_LOOKBACK_SECONDS = 90 * 24 * 60 * 60
+
+
+MATCH_OUTCOMES = {
+    0: "Unknown",
+    1: "Win",
+    2: "Loss",
+    3: "Penalized",
+    4: "Party penalty",
+    5: "Unscored",
+}
+MATCH_MODES = {
+    0: "Unknown",
+    1: "Unranked",
+    2: "Private lobby",
+    3: "Co-op bots",
+    4: "Ranked",
+    5: "Server test",
+    6: "Tutorial",
+    7: "Hero Labs",
+    8: "Placement",
+}
+
+SUMMARY_FIELDS = {
+    "totalMatches": "total_matches",
+    "wins": "wins",
+    "losses": "losses",
+    "unscored": "unscored",
+    "winRatePercentage": "win_rate",
+    "killDeathRatio": "kill_death_ratio",
+    "avgSoulsCollected": "avg_souls",
+    "dominantHero": "dominant_hero",
+    "dominantHeroMatches": "dominant_hero_matches",
+    "overallMostPlayedHero": "overall_hero",
+    "overallMostPlayedHeroMatches": "overall_hero_matches",
+}
 
 
 def select_matches(matches, scope):
@@ -64,6 +122,7 @@ def win_percentage(wins, losses):
 
 @app.get("/api/player/{account_id}/matches")
 async def get_player_matches(
+    request: Request,
     account_id: int,
     scope: str = Query(default="season1", pattern="^(all|season1)$"),
     page: int = Query(default=1, ge=1),
@@ -71,10 +130,10 @@ async def get_player_matches(
 ):
     if account_id < 0:
         raise HTTPException(status_code=422, detail="Account ID must be non-negative.")
-    async with httpx.AsyncClient() as client:
+    async with client_for(request) as client:
         try:
             response = await client.get(
-                f"https://api.deadlock-api.com/v1/players/{account_id}/match-history"
+                f"{API_BASE}/players/{account_id}/match-history"
             )
             if response.status_code == 404:
                 raise HTTPException(
@@ -96,41 +155,12 @@ async def get_player_matches(
             rank_badge = None
             if ranked_badges:
                 rank_badge = max(ranked_badges) if scope == "all" else ranked_badges[0]
-            all_time_badges = valid_rank_badges(raw_matches)
+            all_time_badges = (
+                ranked_badges if scope == "all" else valid_rank_badges(raw_matches)
+            )
             start = (page - 1) * page_size
             selected = matches[start : start + page_size]
-            heroes = {}
-            if selected:
-                try:
-                    hero_response = await client.get(
-                        "https://api.deadlock-api.com/v1/assets/heroes"
-                    )
-                    if hero_response.status_code == 200:
-                        heroes = {
-                            str(hero["id"]): hero["name"]
-                            for hero in hero_response.json()
-                        }
-                except httpx.RequestError:
-                    pass  # Keep the match list usable if hero names are temporarily unavailable.
-            outcomes = {
-                0: "Unknown",
-                1: "Win",
-                2: "Loss",
-                3: "Penalized",
-                4: "Party penalty",
-                5: "Unscored",
-            }
-            modes = {
-                0: "Unknown",
-                1: "Unranked",
-                2: "Private lobby",
-                3: "Co-op bots",
-                4: "Ranked",
-                5: "Server test",
-                6: "Tutorial",
-                7: "Hero Labs",
-                8: "Placement",
-            }
+            heroes = await fetch_hero_names(client) if selected else {}
             return {
                 "accountId": str(account_id),
                 "scope": scope,
@@ -152,8 +182,12 @@ async def get_player_matches(
                             str(match.get("hero_id")),
                             f"Hero {match.get('hero_id', '?')}",
                         ),
-                        "mode": modes.get(match.get("match_mode"), "Unknown"),
-                        "result": outcomes.get(
+                        "mode": (
+                            "Street Brawl"
+                            if match.get("game_mode") == STREET_BRAWL_GAME_MODE
+                            else MATCH_MODES.get(match.get("match_mode"), "Unknown")
+                        ),
+                        "result": MATCH_OUTCOMES.get(
                             match.get("player_match_outcome"), "Unknown"
                         ),
                         "kills": match.get("player_kills"),
@@ -171,8 +205,8 @@ async def get_player_matches(
             )
 
 
-# Dependency to open/close safe database sessions automatically per request
 def get_db():
+    """Provide a database session and close it when the request finishes."""
     db = SessionLocal()
     try:
         yield db
@@ -186,14 +220,14 @@ async def root():
 
 
 @app.get("/api/player/search")
-async def search_players(query: str = Query(min_length=1, max_length=100)):
+async def search_players(request: Request, query: str = Query(min_length=1, max_length=100)):
     query = query.strip()
     if not query:
         raise HTTPException(status_code=422, detail="Enter a player name.")
-    async with httpx.AsyncClient() as client:
+    async with client_for(request) as client:
         try:
             response = await client.get(
-                "https://api.deadlock-api.com/v1/players/steam-search",
+                f"{API_BASE}/players/steam-search",
                 params={
                     "search_query": query,
                     "limit": 100,
@@ -209,13 +243,18 @@ async def search_players(query: str = Query(min_length=1, max_length=100)):
                 )
             # Stable sort keeps the upstream similarity order within each group.
             normalized_query = query.casefold()
+
+            def search_priority(player):
+                name = player["personaname"].casefold()
+                return (
+                    name != normalized_query,
+                    not name.startswith(normalized_query),
+                    normalized_query not in name,
+                )
+
             players = sorted(
                 response.json(),
-                key=lambda player: (
-                    player["personaname"].casefold() != normalized_query,
-                    not player["personaname"].casefold().startswith(normalized_query),
-                    normalized_query not in player["personaname"].casefold(),
-                ),
+                key=search_priority,
             )[:10]
             return {
                 "players": [
@@ -232,209 +271,105 @@ async def search_players(query: str = Query(min_length=1, max_length=100)):
             raise HTTPException(
                 status_code=502, detail="The Deadlock API could not be reached."
             )
+def utc_now():
+    # The existing PostgreSQL column stores UTC without a timezone suffix.
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def summary_response(account_id, scope, values):
+    response = {
+        "accountId": str(account_id),
+        "scope": scope,
+        "hasRankedMatches": bool(values["total_matches"]),
+        "metrics": {key: values[field] for key, field in SUMMARY_FIELDS.items()},
+    }
+    if not values["total_matches"]:
+        response["message"] = "No matches recorded for this player in the selected scope."
+    return response
+
+
+def read_cached_summary(db, account_id):
+    """Complete the read transaction before any upstream network waits."""
+    try:
+        record = db.query(PlayerStat).filter(PlayerStat.account_id == account_id).first()
+        now = utc_now()
+        oldest_allowed = now - timedelta(seconds=MATCH_CACHE_SECONDS)
+        if (
+            record
+            and record.season == SEASON_1_CACHE_VERSION
+            and record.updated_at is not None
+            and oldest_allowed <= record.updated_at <= now
+        ):
+            return {field: getattr(record, field) for field in SUMMARY_FIELDS.values()}
+        return None
+    finally:
+        db.rollback()
+
+
+def save_summary(db, account_id, values, fetched_at):
+    try:
+        record = db.query(PlayerStat).filter(PlayerStat.account_id == account_id).first()
+        values = {**values, "season": SEASON_1_CACHE_VERSION, "updated_at": fetched_at}
+        if record:
+            for field, value in values.items():
+                setattr(record, field, value)
+        else:
+            db.add(PlayerStat(account_id=account_id, **values))
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
 
 
 @app.get("/api/player/{account_id}/summary")
 async def get_player_performance(
-    account_id: str,
+    request: Request,
     db: Annotated[Session, Depends(get_db)],
+    account_id: int = Path(ge=0),
     scope: str = Query(default="season1", pattern="^(all|season1)$"),
 ):
-    scope_key = scope.lower()
-    season_only = scope_key == "season1"
-    unscored_cutoff = int(time.time()) - UNSCORED_LOOKBACK_SECONDS
+    try:
+        if scope == "season1":
+            cached = await run_in_threadpool(read_cached_summary, db, str(account_id))
+            if cached is not None:
+                return summary_response(account_id, scope, cached)
 
-    # Reuse the seasonal summary only while its unscored lookback remains valid.
-    cached_record = (
-        db.query(PlayerStat).filter(PlayerStat.account_id == account_id).first()
-    )
-    if (
-        cached_record
-        and season_only
-        and unscored_cutoff <= SEASON_1_START
-        and cached_record.season == SEASON_1
-        and not cached_record.dominant_hero.isdigit()
-    ):
-        logger.info("Serving cached player metrics: %s", account_id)
-        win_rate = win_percentage(cached_record.wins or 0, cached_record.losses or 0)
-        cached_record.win_rate = win_rate
-        db.commit()
-        return {
-            "accountId": cached_record.account_id,
-            "scope": scope_key,
-            "metrics": {
-                "totalMatches": cached_record.total_matches,
-                "wins": cached_record.wins,
-                "losses": cached_record.losses,
-                "unscored": cached_record.unscored,
-                "winRatePercentage": win_rate,
-                "killDeathRatio": cached_record.kill_death_ratio,
-                "avgSoulsCollected": cached_record.avg_souls,
-                "dominantHero": cached_record.dominant_hero,
-                "dominantHeroMatches": cached_record.dominant_hero_matches,
-                "overallMostPlayedHero": cached_record.overall_hero,
-                "overallMostPlayedHeroMatches": cached_record.overall_hero_matches,
-            },
-        }
-
-    # Otherwise calculate metrics from the upstream match history.
-    logger.info("Loading player metrics: %s (%s)", account_id, scope_key)
-
-    async with httpx.AsyncClient() as client:
-        try:
-            api_url = (
-                f"https://api.deadlock-api.com/v1/players/{account_id}/match-history"
+        async with client_for(request) as client:
+            response = await client.get(
+                f"{API_BASE}/players/{account_id}/match-history"
             )
-            response = await client.get(api_url)
-
+            if response.status_code == 404:
+                raise HTTPException(404, "Player telemetry timeline missing or profile set to private.")
             if response.status_code != 200:
-                raise HTTPException(
-                    status_code=404,
-                    detail="Player telemetry timeline missing or profile set to private.",
-                )
-
+                raise HTTPException(502, "Player statistics are temporarily unavailable.")
             raw_matches = response.json()
-
+            fetched_at = getattr(response, "fetched_at", utc_now())
             if not raw_matches:
-                raise HTTPException(
-                    status_code=404,
-                    detail="No public competitive matches recorded for this ID.",
-                )
+                raise HTTPException(404, "No public competitive matches recorded for this ID.")
 
-            heroes_response = await client.get(
-                "https://api.deadlock-api.com/v1/assets/heroes"
-            )
-            hero_names = (
-                {str(hero["id"]): hero["name"] for hero in heroes_response.json()}
-                if heroes_response.status_code == 200
-                else {}
-            )
+            hero_names = await fetch_hero_names(client)
 
-            overall_hero_counts = pd.Series(
-                match["hero_id"]
-                for match in raw_matches
-                if match.get("hero_id") is not None
-            ).value_counts()
-            overall_hero_id = (
-                str(overall_hero_counts.idxmax())
-                if not overall_hero_counts.empty
-                else "Unknown"
-            )
-            overall_hero_matches = (
-                int(overall_hero_counts.max()) if not overall_hero_counts.empty else 0
-            )
-            overall_hero = hero_names.get(overall_hero_id, overall_hero_id)
-
-            filtered_matches = select_matches(raw_matches, scope_key)
-
-            if not filtered_matches:
-                return {
-                    "accountId": account_id,
-                    "scope": scope_key,
-                    "hasRankedMatches": False,
-                    "message": "No matches recorded for this player in the selected scope.",
-                    "metrics": {
-                        "totalMatches": 0,
-                        "wins": 0,
-                        "losses": 0,
-                        "unscored": 0,
-                        "winRatePercentage": None,
-                        "killDeathRatio": None,
-                        "avgSoulsCollected": None,
-                        "dominantHero": "Unknown",
-                        "dominantHeroMatches": 0,
-                        "overallMostPlayedHero": overall_hero,
-                        "overallMostPlayedHeroMatches": overall_hero_matches,
-                    },
-                }
-
-            df = pd.DataFrame(filtered_matches)
-            wins = int(df["player_match_outcome"].eq(1).sum())
-            losses = int(df["player_match_outcome"].eq(2).sum())
-            unscored = int(
-                (
-                    df["player_match_outcome"].ne(1)
-                    & df["player_match_outcome"].ne(2)
-                    & df["start_time"].ge(unscored_cutoff)
-                ).sum()
-            )
-            total_matches = len(filtered_matches)
-            win_rate = win_percentage(wins, losses)
-            total_kills = int(df["player_kills"].sum())
-            total_deaths = int(df["player_deaths"].sum())
-            kill_death_ratio = (
-                float(round(total_kills / total_deaths, 2))
-                if total_deaths
-                else float(total_kills)
-            )
-            avg_souls = (
-                int(df["net_worth"].mean())
-                if "net_worth" in df.columns and not df.empty
-                else 0
-            )
-            hero_match_counts = df["hero_id"].value_counts()
-            favorite_hero_id = (
-                str(hero_match_counts.idxmax())
-                if not hero_match_counts.empty
-                else "Unknown"
-            )
-            favorite_hero_matches = (
-                int(hero_match_counts.max()) if not hero_match_counts.empty else 0
-            )
-            favorite_hero = hero_names.get(favorite_hero_id, favorite_hero_id)
-
-            if season_only:
-                values = {
-                    "total_matches": total_matches,
-                    "wins": wins,
-                    "losses": losses,
-                    "unscored": unscored,
-                    "win_rate": win_rate,
-                    "kill_death_ratio": kill_death_ratio,
-                    "avg_souls": avg_souls,
-                    "dominant_hero": favorite_hero,
-                    "dominant_hero_matches": favorite_hero_matches,
-                    "overall_hero": overall_hero,
-                    "overall_hero_matches": overall_hero_matches,
-                    "season": SEASON_1,
-                }
-                if cached_record:
-                    for field, value in values.items():
-                        setattr(cached_record, field, value)
-                else:
-                    db.add(PlayerStat(account_id=account_id, **values))
-            db.commit()
-            logger.info("Player metrics processed: %s (%s)", account_id, scope_key)
-
-            return {
-                "accountId": account_id,
-                "scope": scope_key,
-                "hasRankedMatches": bool(filtered_matches),
-                "metrics": {
-                    "totalMatches": total_matches,
-                    "wins": wins,
-                    "losses": losses,
-                    "unscored": unscored,
-                    "winRatePercentage": win_rate,
-                    "killDeathRatio": kill_death_ratio,
-                    "avgSoulsCollected": avg_souls,
-                    "dominantHero": favorite_hero,
-                    "dominantHeroMatches": favorite_hero_matches,
-                    "overallMostPlayedHero": overall_hero,
-                    "overallMostPlayedHeroMatches": overall_hero_matches,
-                },
-            }
-
-        except HTTPException:
-            db.rollback()
-            raise
-        except httpx.RequestError as e:
-            db.rollback()
-            logger.warning("Player telemetry request failed: %s", e)
-            raise HTTPException(
-                status_code=502, detail="The Deadlock API could not be reached."
-            )
-        except Exception as e:
-            db.rollback()
-            logger.exception("Player telemetry processing failed")
-            raise HTTPException(status_code=500, detail=f"Pipeline Failure: {e!s}")
+        overall_id, overall_count = most_played_hero(raw_matches)
+        selected = select_matches(raw_matches, scope)
+        values = calculate_metrics(selected, int(time.time()) - UNSCORED_LOOKBACK_SECONDS)
+        favorite_id, favorite_count = most_played_hero(selected)
+        values.update({
+            "win_rate": win_percentage(values["wins"], values["losses"]) if selected else None,
+            "dominant_hero": hero_names.get(favorite_id, favorite_id),
+            "dominant_hero_matches": favorite_count,
+            "overall_hero": hero_names.get(overall_id, overall_id),
+            "overall_hero_matches": overall_count,
+        })
+        if not selected:
+            values["kill_death_ratio"] = values["avg_souls"] = None
+        elif scope == "season1":
+            await run_in_threadpool(save_summary, db, str(account_id), values, fetched_at)
+        return summary_response(account_id, scope, values)
+    except HTTPException:
+        raise
+    except httpx.RequestError as exc:
+        logger.warning("Player telemetry request failed: %s", exc)
+        raise HTTPException(502, "The Deadlock API could not be reached.") from exc
+    except Exception as exc:
+        logger.exception("Player telemetry processing failed")
+        raise HTTPException(500, "Player statistics could not be processed.") from exc

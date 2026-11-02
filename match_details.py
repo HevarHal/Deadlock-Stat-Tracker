@@ -1,10 +1,10 @@
 """On-demand item timelines and starting guides for a match participant."""
 
 import httpx
-from fastapi import APIRouter, HTTPException, Path
+from fastapi import APIRouter, HTTPException, Path, Request
+from upstream import API_BASE, client_for
 
 router = APIRouter()
-API_BASE = "https://api.deadlock-api.com/v1"
 
 
 def item_view(item_id, catalog):
@@ -81,9 +81,9 @@ async def fetch_starting_guide(client, player, build_id, catalog):
 
 
 @router.get("/api/player/{account_id}/matches/{match_id}/build")
-async def match_build(account_id: int = Path(ge=0), match_id: int = Path(ge=0)):
+async def match_build(request: Request, account_id: int = Path(ge=0), match_id: int = Path(ge=0)):
     try:
-        async with httpx.AsyncClient(timeout=20) as client:
+        async with client_for(request) as client:
             metadata = await client.get(
                 f"{API_BASE}/matches/{match_id}/metadata",
                 params={"disable_steam": "true"},

@@ -101,6 +101,18 @@ class MatchHistoryTests(unittest.TestCase):
         self.assertEqual(rows[1]["souls"], 23456)
         self.assertEqual(rows[1]["heroName"], "Hero 99")
 
+    def test_street_brawl_is_distinguished_from_standard_unranked(self):
+        standard = match(1, mode=1)
+        street_brawl = {**match(2, mode=1), "game_mode": 4}
+
+        rows = {
+            entry["matchId"]: entry["mode"]
+            for entry in self.request([standard, street_brawl]).json()["matches"]
+        }
+
+        self.assertEqual(rows[1], "Unranked")
+        self.assertEqual(rows[2], "Street Brawl")
+
     def test_empty_history_and_page_past_end(self):
         result = self.request([]).json()
         self.assertEqual(result["matches"], [])
