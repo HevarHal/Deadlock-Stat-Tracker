@@ -24,13 +24,18 @@ The demo uses a public account and shows the deployed dashboard. Statistics chan
 - Copy build and match IDs with one click; the confirmation clears after one second.
 - Share player profiles at `/player/<player name>` and reload the selected player on refresh without session storage.
 - Keep profile statistics visible while refreshing match history when changing scope.
-- Cache Season 1 summary statistics in PostgreSQL.
+- Cache Season 1 summary statistics in PostgreSQL for up to 5 minutes.
+- Share cached upstream player history and match details for 5 minutes, with hero/item catalogs cached for one hour.
 
 Rank badges depend on upstream availability. Missing badges display as unavailable; all-time rank means the highest rank in the match history returned by the API, not a guaranteed complete career record. Win rate uses decided wins and losses, while total matches includes all outcomes.
 
 Item timelines and starting guides depend on available match metadata and processed replay data. The recorded guide is the one selected at match start; later guide switches are not recorded, and the available guide may have changed since the match. Missing data is shown as unavailable, with retry controls for failed requests.
 
-Player URLs identify the profile to load without session storage. Shared name links search for an exact name; duplicate names show a player picker. Refresh resets the scope to All Matches and match history to page 1. The app does not save scroll position.
+Player URLs identify the profile to load without session storage. Shared name links search for an exact name; duplicate names show a player picker. Refresh resets the scope to All Matches and match history to page 1, and reloads player data through the existing API routes and their cache policies. The app does not save scroll position.
+
+The backend reuses one HTTP client per application worker and shares simultaneous requests for the same upstream resource. Only successful, valid JSON responses are cached. Each worker limits the cache to 128 entries and 32 MiB of serialized response bodies; parsed Python objects use additional memory. Cache entries expire after 5 minutes, or one hour for catalogs. Search is uncached. PostgreSQL summaries use the original history fetch time, so saving a summary does not extend history freshness. Database operations run in a thread pool, and summary calculation uses plain Python rather than Pandas.
+
+See [EC2 benchmark results](docs/performance-2026-11-02.md) for the measured before/after response times and limitations.
 
 ## Run with Docker
 
@@ -86,7 +91,7 @@ npm run lint
 npm test
 ```
 
-Frontend tests cover purchase/sale timeline grouping, player URL navigation, refresh without session storage, and duplicate player names, and shared number/time formatting.
+Frontend tests cover purchase/sale timeline grouping, player URL navigation and refresh without session storage, duplicate player names, and shared number/time formatting.
 
 ### Backend tests
 
@@ -116,6 +121,8 @@ Supported scopes are `all` and `season1`. Match pages start at 1; page size is b
 main.py                              Player search, match history, and summary routes
 database.py                          SQLAlchemy models and database setup
 match_details.py                     Item timelines and starting build-guide route
+upstream.py                          Shared HTTP client, bounded cache, and request deduplication
+metrics.py                           Player totals and hero counts
 tests/                               Backend regression tests
 deadlock-dashboard/
   index.html                         Dashboard markup
