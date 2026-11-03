@@ -1,7 +1,7 @@
 import logging
 import time
 from contextlib import asynccontextmanager
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
 import httpx
@@ -220,7 +220,9 @@ async def root():
 
 
 @app.get("/api/player/search")
-async def search_players(request: Request, query: str = Query(min_length=1, max_length=100)):
+async def search_players(
+    request: Request, query: str = Query(min_length=1, max_length=100)
+):
     query = query.strip()
     if not query:
         raise HTTPException(status_code=422, detail="Enter a player name.")
@@ -271,9 +273,11 @@ async def search_players(request: Request, query: str = Query(min_length=1, max_
             raise HTTPException(
                 status_code=502, detail="The Deadlock API could not be reached."
             )
+
+
 def utc_now():
     # The existing PostgreSQL column stores UTC without a timezone suffix.
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 def summary_response(account_id, scope, values):
@@ -284,14 +288,18 @@ def summary_response(account_id, scope, values):
         "metrics": {key: values[field] for key, field in SUMMARY_FIELDS.items()},
     }
     if not values["total_matches"]:
-        response["message"] = "No matches recorded for this player in the selected scope."
+        response["message"] = (
+            "No matches recorded for this player in the selected scope."
+        )
     return response
 
 
 def read_cached_summary(db, account_id):
     """Complete the read transaction before any upstream network waits."""
     try:
-        record = db.query(PlayerStat).filter(PlayerStat.account_id == account_id).first()
+        record = (
+            db.query(PlayerStat).filter(PlayerStat.account_id == account_id).first()
+        )
         now = utc_now()
         oldest_allowed = now - timedelta(seconds=MATCH_CACHE_SECONDS)
         if (
@@ -308,7 +316,9 @@ def read_cached_summary(db, account_id):
 
 def save_summary(db, account_id, values, fetched_at):
     try:
-        record = db.query(PlayerStat).filter(PlayerStat.account_id == account_id).first()
+        record = (
+            db.query(PlayerStat).filter(PlayerStat.account_id == account_id).first()
+        )
         values = {**values, "season": SEASON_1_CACHE_VERSION, "updated_at": fetched_at}
         if record:
             for field, value in values.items():
@@ -339,31 +349,45 @@ async def get_player_performance(
                 f"{API_BASE}/players/{account_id}/match-history"
             )
             if response.status_code == 404:
-                raise HTTPException(404, "Player telemetry timeline missing or profile set to private.")
+                raise HTTPException(
+                    404, "Player telemetry timeline missing or profile set to private."
+                )
             if response.status_code != 200:
-                raise HTTPException(502, "Player statistics are temporarily unavailable.")
+                raise HTTPException(
+                    502, "Player statistics are temporarily unavailable."
+                )
             raw_matches = response.json()
             fetched_at = getattr(response, "fetched_at", utc_now())
             if not raw_matches:
-                raise HTTPException(404, "No public competitive matches recorded for this ID.")
+                raise HTTPException(
+                    404, "No public competitive matches recorded for this ID."
+                )
 
             hero_names = await fetch_hero_names(client)
 
         overall_id, overall_count = most_played_hero(raw_matches)
         selected = select_matches(raw_matches, scope)
-        values = calculate_metrics(selected, int(time.time()) - UNSCORED_LOOKBACK_SECONDS)
+        values = calculate_metrics(
+            selected, int(time.time()) - UNSCORED_LOOKBACK_SECONDS
+        )
         favorite_id, favorite_count = most_played_hero(selected)
-        values.update({
-            "win_rate": win_percentage(values["wins"], values["losses"]) if selected else None,
-            "dominant_hero": hero_names.get(favorite_id, favorite_id),
-            "dominant_hero_matches": favorite_count,
-            "overall_hero": hero_names.get(overall_id, overall_id),
-            "overall_hero_matches": overall_count,
-        })
+        values.update(
+            {
+                "win_rate": win_percentage(values["wins"], values["losses"])
+                if selected
+                else None,
+                "dominant_hero": hero_names.get(favorite_id, favorite_id),
+                "dominant_hero_matches": favorite_count,
+                "overall_hero": hero_names.get(overall_id, overall_id),
+                "overall_hero_matches": overall_count,
+            }
+        )
         if not selected:
             values["kill_death_ratio"] = values["avg_souls"] = None
         elif scope == "season1":
-            await run_in_threadpool(save_summary, db, str(account_id), values, fetched_at)
+            await run_in_threadpool(
+                save_summary, db, str(account_id), values, fetched_at
+            )
         return summary_response(account_id, scope, values)
     except HTTPException:
         raise

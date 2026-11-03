@@ -2,6 +2,7 @@
 
 import httpx
 from fastapi import APIRouter, HTTPException, Path, Request
+
 from upstream import API_BASE, client_for
 
 router = APIRouter()
@@ -53,7 +54,7 @@ async def fetch_starting_guide(client, player, build_id, catalog):
             if response.status_code == 200:
                 build = response.json()["hero_build"]
                 guide = {
-                    "id": build_id,
+                    "id": build["hero_build_id"],
                     "name": build["name"],
                     "description": build.get("description"),
                     "version": build.get("version"),
@@ -81,7 +82,9 @@ async def fetch_starting_guide(client, player, build_id, catalog):
 
 
 @router.get("/api/player/{account_id}/matches/{match_id}/build")
-async def match_build(request: Request, account_id: int = Path(ge=0), match_id: int = Path(ge=0)):
+async def match_build(
+    request: Request, account_id: int = Path(ge=0), match_id: int = Path(ge=0)
+):
     try:
         async with client_for(request) as client:
             metadata = await client.get(
@@ -126,6 +129,7 @@ async def match_build(request: Request, account_id: int = Path(ge=0), match_id: 
                 "matchId": match_id,
                 "accountId": str(account_id),
                 "items": purchases,
+                "buildId": guide["id"] if guide else None,
                 "guide": guide,
                 "guideMessage": guide_message if guide is None else None,
             }

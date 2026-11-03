@@ -5,7 +5,7 @@ let portraits = [],
   ranks = [];
 export const tableAssets = Promise.all(
   ["portraits", "ranks"].map((name) =>
-    fetch(`assets/${name}.json`).then((r) => r.json()),
+    fetch(`/assets/${name}.json`).then((r) => r.json()),
   ),
 )
   .then(([p, r]) => {

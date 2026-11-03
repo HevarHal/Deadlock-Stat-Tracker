@@ -22,7 +22,7 @@ The demo uses a public account and shows the deployed dashboard. Statistics chan
 - Show actual item sales as crossed-out icons at the time of sale; components consumed by upgrades are not reported as sold.
 - View the starting build guide's name, build ID, and description when available.
 - Copy build and match IDs with one click; the confirmation clears after one second.
-- Remember the selected player, scope, history page, search text, and scroll position for the current tab. Refresh reloads the same view.
+- Share player profiles at `/player/<player name>` and reload the selected player on refresh without session storage.
 - Keep profile statistics visible while refreshing match history when changing scope.
 - Cache Season 1 summary statistics in PostgreSQL.
 
@@ -30,7 +30,7 @@ Rank badges depend on upstream availability. Missing badges display as unavailab
 
 Item timelines and starting guides depend on available match metadata and processed replay data. The recorded guide is the one selected at match start; later guide switches are not recorded, and the available guide may have changed since the match. Missing data is shown as unavailable, with retry controls for failed requests.
 
-Tab memory uses browser `sessionStorage`, rather than permanently saving the view. A new independent tab starts fresh; browser tab-restoration features may restore saved state. Refreshing reloads player data through the existing API routes; it does not add a new database cache policy.
+Player URLs identify the profile to load without session storage. Shared name links search for an exact name; duplicate names show a player picker. Refresh resets the scope to All Matches and match history to page 1. The app does not save scroll position.
 
 ## Run with Docker
 
@@ -53,6 +53,8 @@ docker compose down
 The PostgreSQL named volume persists when stopping the stack. `docker compose down -v` deletes that volume and its data.
 
 ## Development
+
+See [the development guide](docs/development.md) for module responsibilities, state and cache rules, and generated-file cleanup.
 
 Use Python 3.12 and Node.js 22, matching the Docker images, plus a running PostgreSQL database.
 
@@ -84,7 +86,7 @@ npm run lint
 npm test
 ```
 
-Frontend tests cover purchase/sale timeline grouping, tab-state validation, and shared number/time formatting.
+Frontend tests cover purchase/sale timeline grouping, player URL navigation, refresh without session storage, and duplicate player names, and shared number/time formatting.
 
 ### Backend tests
 
@@ -120,7 +122,7 @@ deadlock-dashboard/
   src/profile-app.js                 Player search, loading, and page coordination
   src/match-table.js                 Match rows, portraits, and rank rendering
   src/match-build.js                 Expandable timelines and ID copy controls
-  src/tab-state.js                   Per-tab view persistence
+  src/player-route.js                Player name URLs and exact-name matching
   src/format.js                      Shared number and time formatting
   src/hero-theme.js                  Hero palette application
   src/hero-palettes.json             Colors sampled from hero artwork

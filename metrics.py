@@ -1,6 +1,7 @@
 """Pure O(n) player-summary calculations without DataFrame allocation."""
-from collections import Counter
+
 import math
+from collections import Counter
 
 
 def most_played_hero(matches):

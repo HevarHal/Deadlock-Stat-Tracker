@@ -97,15 +97,17 @@ function render(panel, data) {
       node("p", "No item purchases were available in this match’s metadata."),
     );
   panel.append(node("h3", "Starting build guide"));
+  const identifiers = node("div", null, "match-build-identifiers");
+  const buildId = data.guide?.id;
+  if (buildId) identifiers.append(copyId("Build ID", buildId));
+  identifiers.append(matchId);
   if (!data.guide) {
-    panel.append(node("p", data.guideMessage), matchId);
+    panel.append(node("p", data.guideMessage), identifiers);
     return;
   }
   const guide = data.guide;
   panel.append(node("h4", guide.name));
   if (guide.description) panel.append(node("p", guide.description));
-  const identifiers = node("div", null, "match-build-identifiers");
-  identifiers.append(copyId("Build ID", guide.id), matchId);
   panel.append(identifiers);
 }
 

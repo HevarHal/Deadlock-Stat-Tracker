@@ -36,6 +36,7 @@ class MatchBuildTests(unittest.TestCase):
         ]
         self.guide = {
             "hero_build": {
+                "hero_build_id": 999,
                 "name": "Example guide",
                 "version": 3,
                 "details": {
@@ -74,6 +75,7 @@ class MatchBuildTests(unittest.TestCase):
         self.assertEqual([item["time"] for item in result["items"]], [20, 80])
         self.assertEqual(result["items"][1]["soldTime"], 150)
         self.assertEqual(result["guide"]["id"], 999)
+        self.assertEqual(result["buildId"], 999)
         self.assertEqual(
             result["guide"]["groups"][0]["items"][0]["annotation"], "Buy first"
         )
@@ -82,6 +84,7 @@ class MatchBuildTests(unittest.TestCase):
         result = self.request(guide_status=404).json()
         self.assertEqual(len(result["items"]), 2)
         self.assertIsNone(result["guide"])
+        self.assertIsNone(result["buildId"])
         self.assertIn("could not be retrieved", result["guideMessage"])
 
     def test_upgrade_components_are_not_reported_as_sales(self):
@@ -93,9 +96,21 @@ class MatchBuildTests(unittest.TestCase):
         self.metadata["match_info"]["players"][0]["items"][0]["flags"] = 2
         self.assertEqual(self.request().json()["items"][1]["soldTime"], 150)
 
+    def test_unresolved_player_build_id_is_not_exposed_as_a_guide_id(self):
+        self.metadata["match_info"]["players"][0]["hero_build_id"] = 999
+        self.metadata.pop("hero_build_ids")
+        result = self.request(guide_status=503).json()
+        self.assertIsNone(result["buildId"])
+        self.assertIsNone(result["guide"])
+        self.guide = {}
+        result = self.request().json()
+        self.assertIsNone(result["buildId"])
+        self.assertIsNone(result["guide"])
+
     def test_unrecorded_guide_and_empty_inventory(self):
         result = self.request(account=456).json()
         self.assertEqual(result["items"], [])
+        self.assertIsNone(result["buildId"])
         self.assertIsNone(result["guide"])
         self.assertIn("not recorded", result["guideMessage"])
 

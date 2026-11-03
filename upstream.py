@@ -1,10 +1,11 @@
 """Worker-local HTTP connection pool and bounded, successful-response cache."""
+
 import asyncio
+import time
 from collections import OrderedDict
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from datetime import datetime, timezone
-import time
+from datetime import UTC, datetime
 
 import httpx
 
@@ -25,19 +26,31 @@ class CacheEntry:
 
 class JSONResponse:
     """Share parsed JSON as read-only data across requests."""
+
     def __init__(self, response, payload):
         self.status_code = response.status_code
         self.payload = payload
-        self.fetched_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        self.fetched_at = datetime.now(UTC).replace(tzinfo=None)
 
     def json(self):
         return self.payload
 
 
 class UpstreamClient:
+    """Cache JSON and share in-flight requests within one application worker.
+
+    Search bypasses the cache. Catalogs use the longer catalog lifetime; other
+    resources use the match lifetime. Only successful, valid JSON is retained.
+    Call close() during shutdown to cancel unfinished fetches.
+    """
+
     def __init__(
-        self, client, *, clock=time.monotonic,
-        max_entries=MAX_CACHE_ENTRIES, max_bytes=MAX_CACHE_BYTES,
+        self,
+        client,
+        *,
+        clock=time.monotonic,
+        max_entries=MAX_CACHE_ENTRIES,
+        max_bytes=MAX_CACHE_BYTES,
     ):
         self.client = client
         self.clock = clock
@@ -48,6 +61,7 @@ class UpstreamClient:
         self.pending = {}
 
     def discard(self, key):
+        """Remove an entry and update the serialized-body byte count."""
         entry = self.cache.pop(key, None)
         if entry:
             self.cache_bytes -= entry.size_bytes
@@ -68,6 +82,7 @@ class UpstreamClient:
             self.discard(oldest_key)
 
     async def get(self, url, **kwargs):
+        """Return cached data or await a fetch shared by identical URL/params."""
         # Search remains uncached; catalogs change much less often than matches.
         ttl = CATALOG_CACHE_SECONDS if "/assets/" in url else MATCH_CACHE_SECONDS
         if "/steam-search" in url:
@@ -84,6 +99,7 @@ class UpstreamClient:
         return await asyncio.shield(self.pending[key])
 
     async def fetch(self, key, url, ttl, kwargs):
+        """Fetch once; always clear the in-flight entry, including on failure."""
         try:
             response = await self.client.get(url, **kwargs)
             size = len(response.content)
@@ -96,6 +112,7 @@ class UpstreamClient:
             self.pending.pop(key, None)
 
     async def close(self):
+        """Cancel and await outstanding upstream requests before shutdown."""
         tasks = list(self.pending.values())
         for task in tasks:
             task.cancel()

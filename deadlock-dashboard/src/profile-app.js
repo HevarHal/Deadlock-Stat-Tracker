@@ -1,16 +1,17 @@
 import { formatNumber } from "./format.js";
 import { applyHeroTheme } from "./hero-theme.js";
 import { renderMatches, renderRank, tableAssets } from "./match-table.js";
-import { readTabState, saveTabState } from "./tab-state.js";
+import { matchingPlayers, playerPath, readPlayerRoute } from "./player-route.js";
 
 const byId = (id) => document.getElementById(id);
-let account = "",
-  scope = "all",
-  page = 1,
-  pages = 0,
-  busy = false,
-  heroes = [];
-const catalog = fetch("assets/heroes.json")
+// View state is transient; the player URL identifies the profile on refresh.
+let account = "";
+let scope = "all";
+let page = 1;
+let pages = 0;
+let busy = false;
+let heroes = [];
+const catalog = fetch("/assets/heroes.json")
   .then((r) => r.json())
   .then((data) => {
     heroes = data;
@@ -102,7 +103,7 @@ async function renderSummary(stats) {
   byId("hero-art").hidden = !hero?.image;
   if (hero?.image) {
     byId("hero-art").dataset.fallback = hero.fallbackImage || "";
-    byId("hero-art").src = hero.image;
+    byId("hero-art").src = new URL(hero.image, window.location.origin + "/").href;
     byId("hero-art").alt = `${hero.name}, this player's most-used hero`;
   }
 }
@@ -156,7 +157,6 @@ async function loadPlayer(summary = true, preserveProfile = false) {
     busy = false;
     byId("history").removeAttribute("aria-busy");
     updateControls();
-    rememberView();
   }
 }
 byId("hero-art").addEventListener("error", () => {
@@ -168,6 +168,13 @@ byId("hero-art").addEventListener("error", () => {
   } else image.hidden = true;
 });
 async function selectPlayer(id, name = "", avatar = "") {
+  const path = playerPath(id, name);
+  const entry = { account: String(id), playerName: name, avatar };
+  if (window.location.pathname.replace(/\/$/, "") !== path) {
+    window.history.pushState(entry, "", path);
+  } else {
+    window.history.replaceState(entry, "", path);
+  }
   account = String(id);
   playerName = name;
   page = 1;
@@ -181,15 +188,7 @@ async function selectPlayer(id, name = "", avatar = "") {
   clearStats();
   await loadPlayer();
 }
-byId("search").addEventListener("submit", async (event) => {
-  event.preventDefault();
-  if (busy) return;
-  const query = event.currentTarget.querySelector("input").value.trim();
-  if (!query) return;
-  if (/^\d+$/.test(query)) {
-    await selectPlayer(query);
-    return;
-  }
+async function searchPlayers(query, resolveRoute = false) {
   busy = true;
   updateControls();
   byId("activity").textContent = "Searching Steam players…";
@@ -198,6 +197,13 @@ byId("search").addEventListener("submit", async (event) => {
     const result = await fetchPlayerData(
       `/api/player/search?query=${encodeURIComponent(query)}`,
     );
+    const exact = matchingPlayers(result.players || [], query);
+    if (resolveRoute && exact.length === 1) {
+      busy = false;
+      const player = exact[0];
+      await selectPlayer(player.accountId, player.playerName, player.avatar);
+      return;
+    }
     for (const player of result.players || []) {
       const button = document.createElement("button");
       button.type = "button";
@@ -216,15 +222,28 @@ byId("search").addEventListener("submit", async (event) => {
       });
       byId("search-results").append(button);
     }
-    byId("activity").textContent = result.players?.length
-      ? ""
-      : "No matching players found.";
+    let message = "No matching players found.";
+    if (result.players?.length) {
+      message = resolveRoute ? "Choose a player below to view their profile." : "";
+    }
+    byId("activity").textContent = message;
   } catch (error) {
     byId("activity").textContent = error.message;
   } finally {
     busy = false;
     updateControls();
   }
+}
+byId("search").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (busy) return;
+  const query = event.currentTarget.querySelector("input").value.trim();
+  if (!query) return;
+  if (/^\d+$/.test(query)) {
+    await selectPlayer(query);
+    return;
+  }
+  await searchPlayers(query);
 });
 document.querySelectorAll("[data-scope]").forEach((button) =>
   button.addEventListener("click", () => {
@@ -286,50 +305,20 @@ new MutationObserver(scheduleNameFit).observe(byId("player-avatar"), {
 });
 document.fonts.ready.then(scheduleNameFit);
 
-let restoringView = false;
-function rememberView() {
-  if (!account || restoringView) return;
-  saveTabState({
-    account,
-    playerName,
-    scope,
-    page,
-    avatar: byId("player-avatar").getAttribute("src") || "",
-    query: byId("search").querySelector("input").value,
-    scrollY: window.scrollY,
-    tableScroll: document.querySelector(".table-scroll").scrollLeft,
-  });
-}
-window.addEventListener("pagehide", rememberView);
+// Reload the selected route so Back/Forward also works during an active request.
+window.addEventListener("popstate", () => window.location.reload());
 
 async function restoreView() {
-  const saved = readTabState();
-  if (!saved) return;
-  restoringView = true;
-  try {
-    account = saved.account;
-    playerName = typeof saved.playerName === "string" ? saved.playerName : "";
-    scope = saved.scope;
-    page = saved.page;
-    byId("search").querySelector("input").value =
-      typeof saved.query === "string" ? saved.query : "";
-    document.querySelectorAll("[data-scope]").forEach((button) => {
-      button.classList.toggle("selected", button.dataset.scope === scope);
-    });
-    if (typeof saved.avatar === "string" && /^https:\/\//.test(saved.avatar)) {
-      byId("player-avatar").src = saved.avatar;
-      byId("player-avatar").alt = `${playerName || "Player"} Steam avatar`;
-      byId("player-avatar").hidden = false;
-    }
-    await loadPlayer();
-    await document.fonts.ready;
-    requestAnimationFrame(() => {
-      document.querySelector(".table-scroll").scrollLeft =
-        Number(saved.tableScroll) || 0;
-      window.scrollTo({ top: Number(saved.scrollY) || 0, behavior: "instant" });
-    });
-  } finally {
-    restoringView = false;
+  const route = readPlayerRoute(window.location.pathname);
+  if (route === null) return;
+  const entry = window.history.state;
+  if (entry?.account && (entry.playerName || entry.account) === route) {
+    await selectPlayer(entry.account, entry.playerName, entry.avatar);
+  } else if (/^\d+$/.test(route)) {
+    await selectPlayer(route);
+  } else {
+    byId("search").querySelector("input").value = route;
+    await searchPlayers(route, true);
   }
 }
 restoreView();
